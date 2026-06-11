@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixture Interactivo - Copa Mundial de la FIFA 2026</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Montserrat & Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        wcGreen: '#006241',    /* Verde oficial de la identidad */
+                        wcTeal: '#00a88f',     /* Turquesa enérgico */
+                        wcGold: '#d4af37',     /* Dorado de la Copa del Mundo */
+                        wcDark: '#071c14',     /* Fondo oscuro premium */
+                        wcRed: '#da291c',      /* Rojo sedes (USA/CAN) */
+                        wcBlue: '#002f6c'      /* Azul noche sedes */
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        title: ['Montserrat', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at center, #0a2f20 0%, #030e0a 100%);
+        }
+        .wc-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+        }
+        /* Ocultar flechas en inputs numéricos */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white flex flex-col justify-between">
+
+    <!-- HEADER DE LA APLICACIÓN -->
+    <header class="w-full py-4 px-6 bg-black/50 backdrop-blur-md border-b border-wcTeal/20 flex flex-col md:flex-row justify-between items-center gap-4 z-20">
+        <div class="flex items-center gap-3">
+            <div class="bg-gradient-to-tr from-wcGold to-yellow-300 p-2.5 rounded-full shadow-lg shadow-wcGold/30">
+                <i class="fa-solid fa-trophy text-wcDark text-2xl animate-pulse"></i>
+            </div>
+            <div>
+                <h1 class="wc-title text-xl md:text-2xl text-transparent bg-clip-text bg-gradient-to-r from-wcGold via-white to-wcTeal leading-none">
+                    COPA MUNDIAL FIFA 2026
+                </h1>
+                <p class="text-[10px] md:text-xs text-gray-400 tracking-widest uppercase">Fixture Interactivo con Guardado Cloud</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-3 text-[11px] text-gray-300 bg-wcDark/80 py-1.5 px-4 rounded-full border border-wcGreen/50">
+            <span class="flex items-center gap-1"><i class="fa-solid fa-map-pin text-wcRed"></i> CAN</span>
+            <span class="text-wcGold">•</span>
+            <span class="flex items-center gap-1"><i class="fa-solid fa-map-pin text-white"></i> USA</span>
+            <span class="text-wcGold">•</span>
+            <span class="flex items-center gap-1"><i class="fa-solid fa-map-pin text-wcGreen"></i> MEX</span>
+        </div>
+    </header>
+
+    <!-- CONTAINER PRINCIPAL -->
+    <main class="flex-grow flex items-center justify-center p-3 md:p-6 w-full">
+        
+        <!-- PANTALLA 1: PORTADA E INGRESO (LOGIN / REGISTRO) -->
+        <section id="login-screen" class="w-full max-w-xl bg-wcDark/95 border border-wcTeal/30 rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur-md relative overflow-hidden transition-all duration-500">
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-wcTeal/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-wcGold/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="text-center mb-6">
+                <span class="text-[10px] font-bold text-wcGold uppercase tracking-widest bg-wcGold/10 px-3 py-1 rounded-full border border-wcGold/20">Portal de Acceso FIFA</span>
+                <h2 class="wc-title text-2xl md:text-3xl mt-2 text-white">Fixture Copa del Mundo</h2>
+                <p class="text-xs text-gray-400 mt-2">Personaliza, guarda y carga tus predicciones desde cualquier dispositivo en tiempo real.</p>
+            </div>
+
+            <!-- Estado de carga inicial de Firebase -->
+            <div id="loading-auth" class="flex flex-col items-center justify-center py-8 gap-3">
+                <div class="w-10 h-10 border-4 border-wcTeal border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-xs text-gray-400">Estableciendo conexión segura...</p>
+            </div>
+
+            <!-- Panel con selector de modo (Registro vs Recuperar) -->
+            <div id="auth-panel" class="hidden space-y-4">
+                <div class="flex border-b border-white/10 pb-1 gap-2">
+                    <button id="btn-mode-new" onclick="toggleAuthMode('new')" class="flex-1 pb-2 text-xs font-bold text-wcTeal border-b-2 border-wcTeal transition-all">
+                        <i class="fa-solid fa-user-plus mr-1"></i> Nuevo Participante
+                    </button>
+                    <button id="btn-mode-load" onclick="toggleAuthMode('load')" class="flex-1 pb-2 text-xs font-bold text-gray-400 border-b-2 border-transparent hover:text-white transition-all">
+                        <i class="fa-solid fa-key mr-1"></i> Recuperar con Teléfono
+                    </button>
+                </div>
+
+                <!-- FORMULARIO 1: REGISTRO NUEVO -->
+                <form id="new-user-form" onsubmit="handleRegistration(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-wcTeal uppercase tracking-wider mb-1.5">Nombre Completo</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
+                                <i class="fa-solid fa-user"></i>
+                            </span>
+                            <input type="text" id="userName" required 
+                                class="w-full pl-10 pr-4 py-2.5 bg-black/40 border border-wcGreen/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-wcTeal focus:border-transparent text-white text-sm" 
+                                placeholder="Ej. Carlos Alcaraz">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-wcTeal uppercase tracking-wider mb-1.5">Número Telefónico (Se usará para reingresar)</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
+                                <i class="fa-solid fa-phone"></i>
+                            </span>
+                            <input type="tel" id="userPhone" required 
+                                class="w-full pl-10 pr-4 py-2.5 bg-black/40 border border-wcGreen/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-wcTeal focus:border-transparent text-white text-sm" 
+                                placeholder="Ej. +57 300 123 4567">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-wcTeal uppercase tracking-wider mb-1.5">País del Pronosticador</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
+                                <i class="fa-solid fa-globe"></i>
+                            </span>
+                            <input type="text" id="userCountry" required 
+                                class="w-full pl-10 pr-4 py-2.5 bg-black/40 border border-wcGreen/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-wcTeal focus:border-transparent text-white text-sm" 
+                                placeholder="Ej. Colombia">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-wcTeal uppercase tracking-wider mb-1.5">Zona Horaria de Visualización</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
+                                <i class="fa-solid fa-clock"></i>
+                            </span>
+                            <select id="userTimezone" class="w-full pl-10 pr-4 py-2.5 bg-black/40 border border-wcGreen/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-wcTeal focus:border-transparent text-white text-sm appearance-none cursor-pointer">
+                                <option value="-5">Colombia, Perú, Ecuador, México (CDMX) (UTC-5)</option>
+                                <option value="-3">Argentina, Brasil (Brasilia), Uruguay (UTC-3)</option>
+                                <option value="-4">Estados Unidos (Este - Miami/NY), Chile, Bolivia, Venezuela (UTC-4)</option>
+                                <option value="-6">Estados Unidos (Centro), Centroamérica (UTC-6)</option>
+                                <option value="-7">Estados Unidos (Montaña), México (Baja California) (UTC-7)</option>
+                                <option value="-8">Estados Unidos (Pacífico - LA/Seattle) (UTC-8)</option>
+                                <option value="2">España (Península), Francia, Alemania (UTC+2)</option>
+                                <option value="0">Horario de Sede FIFA / UTC 0</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" 
+                        class="w-full mt-2 bg-gradient-to-r from-wcTeal via-teal-500 to-wcGreen hover:from-teal-500 hover:to-wcTeal text-white font-bold py-3 px-6 rounded-xl transition duration-300 transform hover:-translate-y-0.5 shadow-lg shadow-wcTeal/25 flex items-center justify-center gap-2 text-sm">
+                        <span>Crear y Sincronizar Fixture</span>
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </button>
+                </form>
+
+                <!-- FORMULARIO 2: RECUPERAR POR TELÉFONO -->
+                <form id="load-user-form" onsubmit="handleRecovery(event)" class="space-y-4 hidden">
+                    <p class="text-xs text-gray-400">Ingresa el número de teléfono con el que te registraste anteriormente para recuperar todo tu avance y marcadores.</p>
+                    
+                    <div>
+                        <label class="block text-xs font-semibold text-wcTeal uppercase tracking-wider mb-1.5">Número de Teléfono Registrado</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
+                                <i class="fa-solid fa-phone"></i>
+                            </span>
+                            <input type="tel" id="recoveryPhone" required 
+                                class="w-full pl-10 pr-4 py-3 bg-black/40 border border-wcGreen/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-wcTeal focus:border-transparent text-white text-sm" 
+                                placeholder="Ej. +57 300 123 4567">
+                        </div>
+                    </div>
+
+                    <button type="submit" 
+                        class="w-full bg-gradient-to-r from-wcGold via-yellow-500 to-amber-600 hover:from-yellow-500 hover:to-wcGold text-wcDark font-bold py-3 px-6 rounded-xl transition duration-300 transform hover:-translate-y-0.5 shadow-lg shadow-wcGold/25 flex items-center justify-center gap-2 text-sm">
+                        <span>Recuperar Fixture Guardado</span>
+                        <i class="fa-solid fa-cloud-arrow-down"></i>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- PANTALLA 2: FIXTURE PRINCIPAL (Oculto al inicio) -->
+        <section id="main-fixture" class="hidden w-full max-w-7xl flex flex-col gap-4 animate-fadeIn">
+            
+            <!-- Barra de Perfil e Información -->
+            <div class="bg-black/40 border border-wcTeal/20 p-4 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 backdrop-blur-md">
+                <div class="flex items-center gap-3">
+                    <div class="bg-wcTeal/10 p-2.5 rounded-xl border border-wcTeal/30 text-wcTeal">
+                        <i class="fa-solid fa-passport text-lg"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 id="profile-name" class="text-base font-bold text-white">Usuario</h3>
+                            <span id="profile-badge" class="text-[10px] bg-wcGold/20 text-wcGold border border-wcGold/30 px-2 py-0.5 rounded-md font-semibold">Colombia</span>
+                            <!-- Indicador de guardado en la nube -->
+                            <span id="sync-indicator" class="text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                <i class="fa-solid fa-cloud"></i> Sincronizado
+                            </span>
+                        </div>
+                        <p id="profile-timezone" class="text-[11px] text-gray-400 mt-0.5">Zona Horaria: UTC-5</p>
+                    </div>
+                </div>
+                <div class="flex gap-2 w-full md:w-auto">
+                    <button onclick="logOut()" class="flex-1 md:flex-none text-xs bg-wcDark border border-wcGreen/50 hover:bg-black/60 px-4 py-2 rounded-xl transition text-gray-300">
+                        <i class="fa-solid fa-right-from-bracket mr-1"></i> Cerrar Sesión
+                    </button>
+                    <button onclick="resetScores()" class="flex-1 md:flex-none text-xs bg-red-950/40 border border-red-500/30 hover:bg-red-900/40 px-4 py-2 rounded-xl transition text-red-200">
+                        <i class="fa-solid fa-trash-can mr-1"></i> Limpiar Todo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Navegación por Fase (Grupos vs Eliminatorias) -->
+            <div class="flex flex-wrap gap-2 border-b border-white/10 pb-2">
+                <button onclick="switchTab('tab-groups')" id="btn-tab-groups" class="px-4 py-2 rounded-xl text-xs font-bold transition-all bg-wcTeal text-white">
+                    <i class="fa-solid fa-table-cells mr-1.5"></i> Fase de Grupos
+                </button>
+                <button onclick="switchTab('tab-bracket')" id="btn-tab-bracket" class="px-4 py-2 rounded-xl text-xs font-bold transition-all bg-black/40 text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-diagram-project mr-1.5"></i> Fase Eliminatoria (Dieciseisavos a Final)
+                </button>
+            </div>
+
+            <!-- CONTENIDO DE PESTAÑA: FASE DE GRUPOS -->
+            <div id="tab-groups" class="space-y-6">
+                <!-- Selector de Grupos (A - L) -->
+                <div class="flex gap-1.5 overflow-x-auto pb-2 scrollbar-style">
+                    <div id="group-selectors" class="flex gap-1.5"></div>
+                </div>
+
+                <!-- Grid con Partidos y Tabla de Posiciones del Grupo Activo -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Partidos del Grupo (Izquierda) -->
+                    <div class="lg:col-span-7 bg-black/40 border border-wcGreen/20 p-4 rounded-2xl">
+                        <h4 class="text-sm font-bold text-wcTeal uppercase tracking-wider mb-4 pb-2 border-b border-white/5 flex items-center justify-between">
+                            <span>Partidos del Grupo <span id="active-group-title">A</span></span>
+                            <span class="text-[10px] text-gray-400 lowercase font-normal">los resultados se guardan automáticamente</span>
+                        </h4>
+                        <div id="group-matches-container" class="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+                            <!-- JS inyectará los partidos del grupo activo aquí -->
+                        </div>
+                    </div>
+
+                    <!-- Tabla del Grupo (Derecha) -->
+                    <div class="lg:col-span-5 bg-black/40 border border-wcGreen/20 p-4 rounded-2xl flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-wcGold uppercase tracking-wider mb-4 pb-2 border-b border-white/5">
+                                Tabla de Posiciones
+                            </h4>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead>
+                                        <tr class="text-gray-400 border-b border-white/10">
+                                            <th class="py-2 pl-2">Pos</th>
+                                            <th class="py-2">Equipo</th>
+                                            <th class="py-2 text-center">PTS</th>
+                                            <th class="py-2 text-center">PJ</th>
+                                            <th class="py-2 text-center">PG</th>
+                                            <th class="py-2 text-center">PE</th>
+                                            <th class="py-2 text-center">PP</th>
+                                            <th class="py-2 text-center">DG</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="group-table-body">
+                                        <!-- JS rellenará la tabla del grupo dinámicamente -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Indicación de Regla de Clasificación -->
+                        <div class="mt-4 p-3 bg-wcTeal/5 border border-wcTeal/20 rounded-xl text-[11px] text-gray-400">
+                            <p><i class="fa-solid fa-circle-info text-wcTeal mr-1"></i> Clasifican los **2 mejores** de cada grupo y los **8 mejores terceros** de entre todos los grupos a la ronda de Dieciseisavos.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTENIDO DE PESTAÑA: BRACKET DE ELIMINATORIAS -->
+            <div id="tab-bracket" class="hidden">
+                <div class="overflow-x-auto pb-6">
+                    <!-- Estructura de Llaves en Columnas -->
+                    <div class="min-w-[1280px] grid grid-cols-5 gap-4 items-stretch px-1">
+                        
+                        <!-- Dieciseisavos -->
+                        <div class="flex flex-col gap-4">
+                            <div class="text-center bg-black/30 border-b-2 border-wcTeal py-2 rounded-t-xl">
+                                <span class="text-xs font-bold text-wcTeal uppercase tracking-wider">Dieciseisavos</span>
+                                <span class="text-[10px] text-gray-400 block">16 Partidos</span>
+                            </div>
+                            <div id="bracket-r32" class="flex flex-col justify-around flex-grow gap-4 py-2">
+                                <!-- JS Inyecta Partidos -->
+                            </div>
+                        </div>
+
+                        <!-- Octavos de Final -->
+                        <div class="flex flex-col gap-4">
+                            <div class="text-center bg-black/30 border-b-2 border-wcGold py-2 rounded-t-xl">
+                                <span class="text-xs font-bold text-wcGold uppercase tracking-wider">Octavos de Final</span>
+                                <span class="text-[10px] text-gray-400 block">8 Partidos</span>
+                            </div>
+                            <div id="bracket-r16" class="flex flex-col justify-around flex-grow gap-8 py-2">
+                                <!-- JS Inyecta Partidos -->
+                            </div>
+                        </div>
+
+                        <!-- Cuartos de Final -->
+                        <div class="flex flex-col gap-4">
+                            <div class="text-center bg-black/30 border-b-2 border-wcRed py-2 rounded-t-xl">
+                                <span class="text-xs font-bold text-wcRed uppercase tracking-wider">Cuartos de Final</span>
+                                <span class="text-[10px] text-gray-400 block">4 Partidos</span>
+                            </div>
+                            <div id="bracket-r8" class="flex flex-col justify-around flex-grow gap-12 py-2">
+                                <!-- JS Inyecta Partidos -->
+                            </div>
+                        </div>
+
+                        <!-- Semifinales -->
+                        <div class="flex flex-col gap-4">
+                            <div class="text-center bg-black/30 border-b-2 border-wcBlue py-2 rounded-t-xl">
+                                <span class="text-xs font-bold text-wcBlue uppercase tracking-wider">Semifinales</span>
+                                <span class="text-[10px] text-gray-400 block">2 Partidos</span>
+                            </div>
+                            <div id="bracket-r4" class="flex flex-col justify-around flex-grow gap-20 py-2">
+                                <!-- JS Inyecta Partidos -->
+                            </div>
+                        </div>
+
+                        <!-- Gran Final & Campeón -->
+                        <div class="flex flex-col gap-4">
+                            <div class="text-center bg-black/30 border-b-2 border-yellow-400 py-2 rounded-t-xl">
+                                <span class="text-xs font-bold text-yellow-400 uppercase tracking-wider">Gran Final</span>
+                                <span class="text-[10px] text-gray-400 block">19 de Julio - NY/NJ</span>
+                            </div>
+                            <div class="flex flex-col justify-center items-center flex-grow gap-6 py-2">
+                                <div id="bracket-r2" class="w-full">
+                                    <!-- JS Inyecta Final -->
+                                </div>
+
+                                <!-- Campeón -->
+                                <div class="w-full bg-gradient-to-b from-yellow-400/20 to-black/60 border border-yellow-400/50 p-6 rounded-2xl text-center shadow-xl shadow-yellow-400/5 relative overflow-hidden">
+                                    <div class="absolute -top-12 -left-12 w-24 h-24 bg-yellow-400/10 rounded-full blur-xl"></div>
+                                    <span class="text-[10px] font-bold tracking-widest text-yellow-400 block uppercase mb-1">Campeón Proyectado</span>
+                                    <i class="fa-solid fa-crown text-yellow-400 text-2xl mb-2 animate-bounce"></i>
+                                    <h4 id="winner-champion" class="wc-title text-xl text-white font-extrabold truncate">
+                                        ¿Quién será?
+                                    </h4>
+                                    <p class="text-[9px] text-gray-400 mt-1">Completa el fixture para consagrar al campeón</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="w-full py-3 text-center text-[11px] text-gray-500 bg-black/80 border-t border-wcGreen/20">
+        <p>© 2026 - Control de Clasificación y Resultados de la Copa Mundial de la FIFA 2026</p>
+    </footer>
+
+    <!-- NOTIFICACIONES -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-wcDark border border-wcTeal text-white px-5 py-3 rounded-xl shadow-2xl transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none flex items-center gap-3 z-50">
+        <span id="toast-icon" class="text-wcTeal"><i class="fa-solid fa-circle-check"></i></span>
+        <span id="toast-message" class="text-xs font-medium"></span>
+    </div>
+
+    <!-- SCRIPT PRINCIPAL CON INTEGRACIÓN FIRESTORE SDK MODULE -->
+    <script type="module">
+        // Importación de Firebase SDK modular moderno (v11)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Configuración de la base de datos proporcionada por el usuario
+        const firebaseConfig = {
+            apiKey: "AIzaSyCsTmJpNRYIhIifKxuZOmctB-3jT1KS6Ek",
+            authDomain: "mundial-2026-5256b.firebaseapp.com",
+            projectId: "mundial-2026-5256b",
+            storageBucket: "mundial-2026-5256b.firebasestorage.app",
+            messagingSenderId: "681081280004",
+            appId: "1:681081280004:web:5216cfc8c65d0c2fd8c751"
+        };
+
+        const finalConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : firebaseConfig;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'mundial-2026-default';
+
+        // Inicializar Firebase
+        const app = initializeApp(finalConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let saveTimeout = null;
+        let authenticatedUserId = null; // ID único del documento basado en el teléfono del usuario
+        let userProfile = { name: '', phone: '', country: '', timezoneOffset: -5 };
+        let activeGroup = 'A'; // Declaración de la variable para el control del grupo activo
+
+        // Exponer la función de Toast en el objeto global Window INMEDIATAMENTE para evitar ReferenceError
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            if (!toast || !toastMsg || !toastIcon) return;
+
+            toastMsg.innerText = msg;
+            if (type === 'error') {
+                toast.classList.replace('border-wcTeal', 'border-red-500');
+                toastIcon.className = "text-red-500";
+                toastIcon.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i>`;
+            } else if (type === 'info') {
+                toast.classList.replace('border-red-500', 'border-wcTeal');
+                toast.classList.replace('border-wcTeal', 'border-blue-500');
+                toastIcon.className = "text-blue-400";
+                toastIcon.innerHTML = `<i class="fa-solid fa-circle-info"></i>`;
+            } else {
+                toast.classList.replace('border-red-500', 'border-wcTeal');
+                toast.classList.replace('border-blue-500', 'border-wcTeal');
+                toastIcon.className = "text-wcTeal";
+                toastIcon.innerHTML = `<i class="fa-solid fa-circle-check"></i>`;
+            }
+
+            toast.classList.remove('opacity-0', 'translate-y-20', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-20', 'pointer-events-none');
+            }, 3000);
+        }
+        window.showToast = showToast;
+
+        // Datos iniciales de los grupos (según tu Excel)
+        const groupTeams = {
+            'A': ['MÉXICO', 'SUDÁFRICA', 'COREA del SUR', 'REP. CHECA'],
+            'B': ['CANADÁ', 'BOSNIA y HERZEG.', 'SUIZA', 'CATAR'],
+            'C': ['BRASIL', 'MARRUECOS', 'ESCOCIA', 'HAITÍ'],
+            'D': ['ESTADOS UNIDOS', 'PARAGUAY', 'TURQUÍA', 'AUSTRALIA'],
+            'E': ['ALEMANIA', 'CURAZAO', 'COSTA de MARFIL', 'ECUADOR'],
+            'F': ['PAÍSES BAJOS', 'JAPÓN', 'TÚNEZ', 'SUECIA'],
+            'G': ['BÉLGICA', 'EGIPTO', 'IRÁN', 'NUEVA ZELANDA'],
+            'H': ['ESPAÑA', 'CABO VERDE', 'URUGUAY', 'ARABIA SAUDITA'],
+            'I': ['FRANCIA', 'SENEGAL', 'NORUEGA', 'IRAK'],
+            'J': ['ARGENTINA', 'ARGELIA', 'AUSTRIA', 'JORDANIA'],
+            'K': ['PORTUGAL', 'REP. del CONGO', 'UZBEKISTÁN', 'COLOMBIA'],
+            'L': ['INGLATERRA', 'CROACIA', 'GHANA', 'PANAMÁ']
+        };
+
+        // Partidos del Excel
+        let groupMatches = [
+            { id: 1, group: 'A', date: '2026-06-11', time: '15:00', team1: 'MÉXICO', team2: 'SUDÁFRICA', stadium: 'Estadio Ciudad de México', score1: '', score2: '' },
+            { id: 2, group: 'A', date: '2026-06-11', time: '22:00', team1: 'COREA del SUR', team2: 'REP. CHECA', stadium: 'Estadio Guadalajara', score1: '', score2: '' },
+            { id: 13, group: 'A', date: '2026-06-15', time: '18:00', team1: 'MÉXICO', team2: 'COREA del SUR', stadium: 'Estadio Ciudad de México', score1: '', score2: '' },
+            { id: 14, group: 'A', date: '2026-06-15', time: '21:00', team1: 'SUDÁFRICA', team2: 'REP. CHECA', stadium: 'Estadio Monterrey', score1: '', score2: '' },
+            { id: 53, group: 'A', date: '2026-06-24', time: '21:00', team1: 'REP. CHECA', team2: 'MÉXICO', stadium: 'Estadio Ciudad de México', score1: '', score2: '' },
+            { id: 54, group: 'A', date: '2026-06-24', time: '21:00', team1: 'SUDÁFRICA', team2: 'COREA del SUR', stadium: 'Estadio Monterrey', score1: '', score2: '' },
+
+            { id: 3, group: 'B', date: '2026-06-12', time: '15:00', team1: 'CANADÁ', team2: 'BOSNIA y HERZEG.', stadium: 'Estadio Toronto', score1: '', score2: '' },
+            { id: 5, group: 'B', date: '2026-06-13', time: '15:00', team1: 'CATAR', team2: 'SUIZA', stadium: 'Estadio San Francisco', score1: '', score2: '' },
+            { id: 15, group: 'B', date: '2026-06-16', time: '12:00', team1: 'CANADÁ', team2: 'CATAR', stadium: 'Estadio Toronto', score1: '', score2: '' },
+            { id: 16, group: 'B', date: '2026-06-16', time: '15:00', team1: 'BOSNIA y HERZEG.', team2: 'SUIZA', stadium: 'Estadio Boston', score1: '', score2: '' },
+            { id: 49, group: 'B', date: '2026-06-24', time: '15:00', team1: 'SUIZA', team2: 'CANADÁ', stadium: 'Estadio Vancouver', score1: '', score2: '' },
+            { id: 50, group: 'B', date: '2026-06-24', time: '15:00', team1: 'BOSNIA y HERZEG.', team2: 'CATAR', stadium: 'Estadio Seattle', score1: '', score2: '' },
+
+            { id: 6, group: 'C', date: '2026-06-13', time: '18:00', team1: 'BRASIL', team2: 'MARRUECOS', stadium: 'Estadio Nueva York/Nueva Jersey', score1: '', score2: '' },
+            { id: 7, group: 'C', date: '2026-06-13', time: '21:00', team1: 'ESCOCIA', team2: 'HAITÍ', stadium: 'Estadio Boston', score1: '', score2: '' },
+            { id: 17, group: 'C', date: '2026-06-16', time: '18:00', team1: 'BRASIL', team2: 'ESCOCIA', stadium: 'Estadio Nueva York/Nueva Jersey', score1: '', score2: '' },
+            { id: 18, group: 'C', date: '2026-06-16', time: '21:00', team1: 'MARRUECOS', team2: 'HAITÍ', stadium: 'Estadio Filadelfia', score1: '', score2: '' },
+            { id: 51, group: 'C', date: '2026-06-24', time: '18:00', team1: 'ESCOCIA', team2: 'BRASIL', stadium: 'Estadio Miami', score1: '', score2: '' },
+            { id: 52, group: 'C', date: '2026-06-24', time: '18:00', team1: 'MARRUECOS', team2: 'HAITÍ', stadium: 'Estadio Atlanta', score1: '', score2: '' },
+
+            { id: 4, group: 'D', date: '2026-06-12', time: '21:00', team1: 'ESTADOS UNIDOS', team2: 'PARAGUAY', stadium: 'Estadio Los Angeles', score1: '', score2: '' },
+            { id: 8, group: 'D', date: '2026-06-13', time: '23:59', team1: 'TURQUÍA', team2: 'AUSTRALIA', stadium: 'Estadio Seattle', score1: '', score2: '' },
+            { id: 25, group: 'D', date: '2026-06-18', time: '19:00', team1: 'ESTADOS UNIDOS', team2: 'TURQUÍA', stadium: 'Estadio Los Angeles', score1: '', score2: '' },
+            { id: 26, group: 'D', date: '2026-06-18', time: '22:00', team1: 'PARAGUAY', team2: 'AUSTRALIA', stadium: 'Estadio San Francisco', score1: '', score2: '' },
+            { id: 59, group: 'D', date: '2026-06-25', time: '22:00', team1: 'TURQUÍA', team2: 'ESTADOS UNIDOS', stadium: 'Estadio Los Angeles', score1: '', score2: '' },
+            { id: 60, group: 'D', date: '2026-06-25', time: '22:00', team1: 'PARAGUAY', team2: 'AUSTRALIA', stadium: 'Estadio San Francisco', score1: '', score2: '' },
+
+            { id: 9, group: 'E', date: '2026-06-14', time: '13:00', team1: 'ALEMANIA', team2: 'CURAZAO', stadium: 'Estadio Houston', score1: '', score2: '' },
+            { id: 11, group: 'E', date: '2026-06-14', time: '19:00', team1: 'COSTA de MARFIL', team2: 'ECUADOR', stadium: 'Estadio Monterrey', score1: '', score2: '' },
+            { id: 27, group: 'E', date: '2026-06-19', time: '13:00', team1: 'ALEMANIA', team2: 'COSTA de MARFIL', stadium: 'Estadio Filadelfia', score1: '', score2: '' },
+            { id: 28, group: 'E', date: '2026-06-19', time: '16:00', team1: 'CURAZAO', team2: 'ECUADOR', stadium: 'Estadio Boston', score1: '', score2: '' },
+            { id: 55, group: 'E', date: '2026-06-25', time: '16:00', team1: 'CURAZAO', team2: 'COSTA de MARFIL', stadium: 'Estadio Filadelfia', score1: '', score2: '' },
+            { id: 56, group: 'E', date: '2026-06-25', time: '16:00', team1: 'ECUADOR', team2: 'ALEMANIA', stadium: 'Estadio Nueva York/Nueva Jersey', score1: '', score2: '' },
+
+            { id: 10, group: 'F', date: '2026-06-14', time: '16:00', team1: 'PAÍSES BAJOS', team2: 'JAPÓN', stadium: 'Estadio Dallas', score1: '', score2: '' },
+            { id: 12, group: 'F', date: '2026-06-14', time: '22:00', team1: 'TÚNEZ', team2: 'SUECIA', stadium: 'Estadio San Francisco', score1: '', score2: '' },
+            { id: 29, group: 'F', date: '2026-06-19', time: '19:00', team1: 'PAÍSES BAJOS', team2: 'TÚNEZ', stadium: 'Estadio Dallas', score1: '', score2: '' },
+            { id: 30, group: 'F', date: '2026-06-19', time: '22:00', team1: 'JAPÓN', team2: 'SUECIA', stadium: 'Estadio Seattle', score1: '', score2: '' },
+            { id: 57, group: 'F', date: '2026-06-25', time: '19:00', team1: 'JAPÓN', team2: 'SUECIA', stadium: 'Estadio Dallas', score1: '', score2: '' },
+            { id: 58, group: 'F', date: '2026-06-25', time: '19:00', team1: 'TÚNEZ', team2: 'PAÍSES BAJOS', stadium: 'Estadio Kansas City', score1: '', score2: '' },
+
+            { id: 14, group: 'G', date: '2026-06-15', time: '15:00', team1: 'BÉLGICA', team2: 'EGIPTO', stadium: 'Estadio Seattle', score1: '', score2: '' },
+            { id: 16, group: 'G', date: '2026-06-15', time: '21:00', team1: 'IRÁN', team2: 'NUEVA ZELANDA', stadium: 'Estadio Los Angeles', score1: '', score2: '' },
+            { id: 31, group: 'G', date: '2026-06-20', time: '12:00', team1: 'BÉLGICA', team2: 'IRÁN', stadium: 'Estadio Vancouver', score1: '', score2: '' },
+            { id: 32, group: 'G', date: '2026-06-20', time: '15:00', team1: 'EGIPTO', team2: 'NUEVA ZELANDA', stadium: 'Estadio Seattle', score1: '', score2: '' },
+            { id: 65, group: 'G', date: '2026-06-26', time: '23:00', team1: 'EGIPTO', team2: 'IRÁN', stadium: 'Estadio Seattle', score1: '', score2: '' },
+            { id: 66, group: 'G', date: '2026-06-26', time: '23:00', team1: 'NUEVA ZELANDA', team2: 'BÉLGICA', stadium: 'Estadio Vancouver', score1: '', score2: '' },
+
+            { id: 13, group: 'H', date: '2026-06-15', time: '12:00', team1: 'ESPAÑA', team2: 'CABO VERDE', stadium: 'Estadio Atlanta', score1: '', score2: '' },
+            { id: 15, group: 'H', date: '2026-06-15', time: '18:00', team1: 'URUGUAY', team2: 'ARABIA SAUDITA', stadium: 'Estadio Dallas', score1: '', score2: '' },
+            { id: 33, group: 'H', date: '2026-06-20', time: '18:00', team1: 'ESPAÑA', team2: 'URUGUAY', stadium: 'Estadio Miami', score1: '', score2: '' },
+            { id: 34, group: 'H', date: '2026-06-20', time: '21:00', team1: 'CABO VERDE', team2: 'ARABIA SAUDITA', stadium: 'Estadio Houston', score1: '', score2: '' },
+            { id: 63, group: 'H', date: '2026-06-26', time: '20:00', team1: 'CABO VERDE', team2: 'ARABIA SAUDITA', stadium: 'Estadio Houston', score1: '', score2: '' },
+            { id: 64, group: 'H', date: '2026-06-26', time: '20:00', team1: 'URUGUAY', team2: 'ESPAÑA', stadium: 'Estadio Guadalajara', score1: '', score2: '' },
+
+            { id: 17, group: 'I', date: '2026-06-16', time: '15:00', team1: 'FRANCIA', team2: 'SENEGAL', stadium: 'Estadio Nueva York/Nueva Jersey', score1: '', score2: '' },
+            { id: 18, group: 'I', date: '2026-06-16', time: '18:00', team1: 'NORUEGA', team2: 'IRAK', stadium: 'Estadio Boston', score1: '', score2: '' },
+            { id: 35, group: 'I', date: '2026-06-21', time: '15:00', team1: 'FRANCIA', team2: 'NORUEGA', stadium: 'Estadio Filadelfia', score1: '', score2: '' },
+            { id: 36, group: 'I', date: '2026-06-21', time: '18:00', team1: 'SENEGAL', team2: 'IRAK', stadium: 'Estadio Toronto', score1: '', score2: '' },
+            { id: 61, group: 'I', date: '2026-06-26', time: '15:00', team1: 'NORUEGA', team2: 'FRANCIA', stadium: 'Estadio Boston', score1: '', score2: '' },
+            { id: 62, group: 'I', date: '2026-06-26', time: '15:00', team1: 'SENEGAL', team2: 'IRAK', stadium: 'Estadio Toronto', score1: '', score2: '' },
+
+            { id: 19, group: 'J', date: '2026-06-16', time: '21:00', team1: 'ARGENTINA', team2: 'ARGELIA', stadium: 'Estadio Kansas City', score1: '', score2: '' },
+            { id: 20, group: 'J', date: '2026-06-16', time: '23:59', team1: 'AUSTRIA', team2: 'JORDANIA', stadium: 'Estadio Seattle', score1: '', score2: '' },
+            { id: 37, group: 'J', date: '2026-06-21', time: '21:00', team1: 'ARGENTINA', team2: 'AUSTRIA', stadium: 'Estadio Dallas', score1: '', score2: '' },
+            { id: 38, group: 'J', date: '2026-06-21', time: '23:59', team1: 'ARGELIA', team2: 'JORDANIA', stadium: 'Estadio Los Angeles', score1: '', score2: '' },
+            { id: 71, group: 'J', date: '2026-06-27', time: '22:00', team1: 'ARGELIA', team2: 'AUSTRIA', stadium: 'Estadio Kansas City', score1: '', score2: '' },
+            { id: 72, group: 'J', date: '2026-06-27', time: '22:00', team1: 'JORDANIA', team2: 'ARGENTINA', stadium: 'Estadio Dallas', score1: '', score2: '' },
+
+            { id: 21, group: 'K', date: '2026-06-17', time: '13:00', team1: 'PORTUGAL', team2: 'REP. del CONGO', stadium: 'Estadio Houston', score1: '', score2: '' },
+            { id: 24, group: 'K', date: '2026-06-17', time: '22:00', team1: 'UZBEKISTÁN', team2: 'COLOMBIA', stadium: 'Estadio Ciudad de México', score1: '', score2: '' },
+            { id: 39, group: 'K', date: '2026-06-22', time: '15:00', team1: 'PORTUGAL', team2: 'UZBEKISTÁN', stadium: 'Estadio Atlanta', score1: '', score2: '' },
+            { id: 40, group: 'K', date: '2026-06-22', time: '18:00', team1: 'REP. del CONGO', team2: 'COLOMBIA', stadium: 'Estadio Monterrey', score1: '', score2: '' },
+            { id: 69, group: 'K', date: '2026-06-27', time: '19:30', team1: 'COLOMBIA', team2: 'PORTUGAL', stadium: 'Estadio Miami', score1: '', score2: '' },
+            { id: 70, group: 'K', date: '2026-06-27', time: '19:30', team1: 'REP. del CONGO', team2: 'UZBEKISTÁN', stadium: 'Estadio Atlanta', score1: '', score2: '' },
+
+            { id: 22, group: 'L', date: '2026-06-17', time: '16:00', team1: 'INGLATERRA', team2: 'CROACIA', stadium: 'Estadio Dallas', score1: '', score2: '' },
+            { id: 23, group: 'L', date: '2026-06-17', time: '19:00', team1: 'GHANA', team2: 'PANAMÁ', stadium: 'Estadio Kansas City', score1: '', score2: '' },
+            { id: 41, group: 'L', date: '2026-06-22', time: '21:00', team1: 'INGLATERRA', team2: 'GHANA', stadium: 'Estadio Dallas', score1: '', score2: '' },
+            { id: 42, group: 'L', date: '2026-06-22', time: '23:59', team1: 'CROACIA', team2: 'PANAMÁ', stadium: 'Estadio San Francisco', score1: '', score2: '' },
+            { id: 67, group: 'L', date: '2026-06-27', time: '17:00', team1: 'PANAMÁ', team2: 'INGLATERRA', stadium: 'Estadio Nueva York/Nueva Jersey', score1: '', score2: '' },
+            { id: 68, group: 'L', date: '2026-06-27', time: '17:00', team1: 'CROACIA', team2: 'GHANA', stadium: 'Estadio Filadelfia', score1: '', score2: '' }
+        ];
+
+        // Estado inicial de las eliminatorias
+        let bracketState = {
+            'd1': { home: '1A', away: '3C/D/E/F', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'o1', slot: 'home', title: '1A vs 3C/D/E/F', stadium: 'Los Angeles' },
+            'd2': { home: '2B', away: '2F', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'o1', slot: 'away', title: '2B vs 2F', stadium: 'Houston' },
+            'd3': { home: '1E', away: '2A', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'o2', slot: 'home', title: '1E vs 2A', stadium: 'Nueva York/NJ' },
+            'd4': { home: '1I', away: '2C', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'o2', slot: 'away', title: '1I vs 2C', stadium: 'Dallas' },
+            'd5': { home: '1C', away: '3A/B/F/G', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'o3', slot: 'home', title: '1C vs 3A/B/F/G', stadium: 'Miami' },
+            'd6': { home: '2D', away: '2G', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'o3', slot: 'away', title: '2D vs 2G', stadium: 'Boston' },
+            'd7': { home: '1G', away: '2E', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'o4', slot: 'home', title: '1G vs 2E', stadium: 'Atlanta' },
+            'd8': { home: '1K', away: '3E/G/H/I', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'o4', slot: 'away', title: '1K vs 3E/G/H/I', stadium: 'Seattle' },
+            'd9': { home: '1B', away: '3A/D/E/H', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'o5', slot: 'home', title: '1B vs 3A/D/E/H', stadium: 'San Francisco' },
+            'd10': { home: '2E', away: '2H', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'o5', slot: 'away', title: '2E vs 2H', stadium: 'Los Angeles' },
+            'd11': { home: '1F', away: '2B', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'o6', slot: 'home', title: '1F vs 2B', stadium: 'Toronto' },
+            'd12': { home: '1J', away: '2D', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'o6', slot: 'away', title: '1J vs 2D', stadium: 'Kansas City' },
+            'd13': { home: '1D', away: '3B/G/H/I', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'o7', slot: 'home', title: '1D vs 3B/G/H/I', stadium: 'Dallas' },
+            'd14': { home: '2I', away: '2J', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'o7', slot: 'away', title: '2I vs 2J', stadium: 'Boston' },
+            'd15': { home: '1H', away: '2K', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'o8', slot: 'home', title: '1H vs 2K', stadium: 'Miami' },
+            'd16': { home: '1L', away: '3I/J/K/L', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'o8', slot: 'away', title: '1L vs 3I/J/K/L', stadium: 'Philadelphia' },
+
+            'o1': { home: 'Ganador D1', away: 'Ganador D2', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'c1', slot: 'home', title: 'Octavos #1', stadium: 'Houston' },
+            'o2': { home: 'Ganador D3', away: 'Ganador D4', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'c1', slot: 'away', title: 'Octavos #2', stadium: 'Philadelphia' },
+            'o3': { home: 'Ganador D5', away: 'Ganador D6', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'c2', slot: 'home', title: 'Octavos #3', stadium: 'Nueva York/NJ' },
+            'o4': { home: 'Ganador D7', away: 'Ganador D8', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'c2', slot: 'away', title: 'Octavos #4', stadium: 'Ciudad de México' },
+            'o5': { home: 'Ganador D9', away: 'Ganador D10', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'c3', slot: 'home', title: 'Octavos #5', stadium: 'Dallas' },
+            'o6': { home: 'Ganador D11', away: 'Ganador D12', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'c3', slot: 'away', title: 'Octavos #6', stadium: 'Seattle' },
+            'o7': { home: 'Ganador D13', away: 'Ganador D14', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'c4', slot: 'home', title: 'Octavos #7', stadium: 'Atlanta' },
+            'o8': { home: 'Ganador D15', away: 'Ganador D16', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'c4', slot: 'away', title: 'Octavos #8', stadium: 'Vancouver' },
+
+            'c1': { home: 'Ganador O1', away: 'Ganador O2', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 's1', slot: 'home', title: 'Cuartos #1', stadium: 'Boston' },
+            'c2': { home: 'Ganador O3', away: 'Ganador O4', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 's1', slot: 'away', title: 'Cuartos #2', stadium: 'Los Angeles' },
+            'c3': { home: 'Ganador O5', away: 'Ganador O6', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 's2', slot: 'home', title: 'Cuartos #3', stadium: 'Miami' },
+            'c4': { home: 'Ganador O7', away: 'Ganador O8', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 's2', slot: 'away', title: 'Cuartos #4', stadium: 'Kansas City' },
+
+            's1': { home: 'Ganador C1', away: 'Ganador C2', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'f1', slot: 'home', title: 'Semifinal #1', stadium: 'Dallas' },
+            's2': { home: 'Ganador C3', away: 'Ganador C4', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'f1', slot: 'away', title: 'Semifinal #2', stadium: 'Atlanta' },
+
+            'f1': { home: 'Ganador S1', away: 'Ganador S2', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'champion', slot: 'home', title: 'Gran Final', stadium: 'Nueva York/Nueva Jersey' }
+        };
+
+        const cleanBracketState = JSON.parse(JSON.stringify(bracketState));
+        const cleanGroupMatches = JSON.parse(JSON.stringify(groupMatches));
+
+        // Inicializar Autenticación Anónima (REGLA 3)
+        const initAuthAndFirestore = async () => {
+            try {
+                let user;
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    const credentials = await signInWithCustomToken(auth, __initial_auth_token);
+                    user = credentials.user;
+                } else {
+                    const credentials = await signInAnonymously(auth);
+                    user = credentials.user;
+                }
+                
+                currentUser = user;
+
+                // Ocultar cargando de Firebase y mostrar selector de autenticación
+                document.getElementById('loading-auth').classList.add('hidden');
+                document.getElementById('auth-panel').classList.remove('hidden');
+
+                // Si ya teníamos una sesión activa guardada en LocalStorage, la cargamos automáticamente
+                const cachedPhone = localStorage.getItem('wc_active_phone');
+                if (cachedPhone) {
+                    await fetchAndLoadPredictions(cachedPhone);
+                }
+
+            } catch (error) {
+                console.error("Error durante autenticación:", error);
+                showToast("Error de conexión de red de Firebase.", "error");
+                document.getElementById('loading-auth').innerHTML = `
+                    <p class="text-xs text-red-400 font-bold"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Conexión fallida</p>
+                    <button onclick="location.reload()" class="mt-2 text-[10px] bg-wcTeal/20 border border-wcTeal px-3 py-1 rounded text-white hover:bg-wcTeal/40 transition">Reintentar</button>
+                `;
+            }
+        };
+
+        // Cambiar entre Pestañas de Registro Nuevo o Carga por Teléfono
+        function toggleAuthMode(mode) {
+            const btnNew = document.getElementById('btn-mode-new');
+            const btnLoad = document.getElementById('btn-mode-load');
+            const formNew = document.getElementById('new-user-form');
+            const formLoad = document.getElementById('load-user-form');
+
+            if (mode === 'new') {
+                btnNew.className = "flex-1 pb-2 text-xs font-bold text-wcTeal border-b-2 border-wcTeal transition-all";
+                btnLoad.className = "flex-1 pb-2 text-xs font-bold text-gray-400 border-b-2 border-transparent hover:text-white transition-all";
+                formNew.classList.remove('hidden');
+                formLoad.classList.add('hidden');
+            } else {
+                btnNew.className = "flex-1 pb-2 text-xs font-bold text-gray-400 border-b-2 border-transparent hover:text-white transition-all";
+                btnLoad.className = "flex-1 pb-2 text-xs font-bold text-wcTeal border-b-2 border-wcTeal transition-all";
+                formNew.classList.add('hidden');
+                formLoad.classList.remove('hidden');
+            }
+        }
+
+        // Sanitizador de teléfono para utilizarlo como userId seguro en la ruta de Firestore
+        function sanitizePhoneId(phone) {
+            return phone.trim().replace(/[^a-zA-Z0-9]/g, '');
+        }
+
+        // CARGAR PREDICCIÓN DESDE LA BASE DE DATOS (REGLA 1 & REGLA 3)
+        async function fetchAndLoadPredictions(phone) {
+            if (!currentUser) return false;
+
+            const phoneId = sanitizePhoneId(phone);
+            if (!phoneId) return false;
+
+            // Ruta estricta de base de datos en espacio de datos públicos para evitar errores de permisos (REGLA 1)
+            const docPath = doc(db, 'artifacts', appId, 'public', 'data', 'predictions', phoneId);
+            
+            try {
+                const docSnap = await getDoc(docPath);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    
+                    // Restaurar perfil de la base de datos
+                    if (data.profile) {
+                        userProfile = data.profile;
+                        document.getElementById('userName').value = userProfile.name;
+                        document.getElementById('userPhone').value = userProfile.phone;
+                        document.getElementById('userCountry').value = userProfile.country;
+                        document.getElementById('userTimezone').value = userProfile.timezoneOffset;
+
+                        document.getElementById('profile-name').innerText = userProfile.name;
+                        document.getElementById('profile-badge').innerText = userProfile.country;
+                        document.getElementById('profile-timezone').innerText = `Zona Horaria: UTC ${userProfile.timezoneOffset >= 0 ? '+' : ''}${userProfile.timezoneOffset}`;
+                    }
+
+                    // Restaurar marcadores
+                    if (data.groupMatches) groupMatches = data.groupMatches;
+                    if (data.bracketState) bracketState = data.bracketState;
+
+                    // Confirmar inicio de sesión
+                    authenticatedUserId = phoneId;
+                    localStorage.setItem('wc_active_phone', userProfile.phone);
+
+                    // Transición de pantallas
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('main-fixture').classList.remove('hidden');
+                    
+                    renderGroupSelector();
+                    renderGroupView();
+                    renderBracket();
+                    updateAllBracketQualifications();
+
+                    showToast("¡Fixture recuperado y cargado en tiempo real!", "success");
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (err) {
+                console.error("Error al leer de Firestore:", err);
+                showToast("Error de conexión al cargar datos.", "error");
+                return false;
+            }
+        }
+
+        // GUARDAR REGISTRO NUEVO E INICIAR FIXTURE
+        async function handleRegistration(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('userName').value.trim();
+            const phone = document.getElementById('userPhone').value.trim();
+            const country = document.getElementById('userCountry').value.trim();
+            const timezone = parseInt(document.getElementById('userTimezone').value);
+
+            const phoneId = sanitizePhoneId(phone);
+
+            if (!name || !phone || !country) {
+                showToast("Por favor, completa todos los campos.", "error");
+                return;
+            }
+
+            if (!currentUser) {
+                showToast("Error: No autenticado. Espera la conexión segura.", "error");
+                return;
+            }
+
+            setSyncState('saving');
+
+            // Guardar usando ruta de datos públicos (REGLA 1) para evitar fallos de permisos al no coincidir el UID de Auth con el teléfono
+            const docPath = doc(db, 'artifacts', appId, 'public', 'data', 'predictions', phoneId);
+            try {
+                const docSnap = await getDoc(docPath);
+                if (docSnap.exists()) {
+                    showToast("Este número de teléfono ya tiene un fixture. Intenta recuperarlo.", "error");
+                    setSyncState('synced');
+                    return;
+                }
+
+                // Guardar los datos en el perfil local de la sesión
+                userProfile = { name, phone, country, timezoneOffset: timezone };
+                authenticatedUserId = phoneId;
+                localStorage.setItem('wc_active_phone', phone);
+
+                // Cargar perfil en dashboard
+                document.getElementById('profile-name').innerText = userProfile.name;
+                document.getElementById('profile-badge').innerText = userProfile.country;
+                document.getElementById('profile-timezone').innerText = `Zona Horaria: UTC ${userProfile.timezoneOffset >= 0 ? '+' : ''}${userProfile.timezoneOffset}`;
+
+                // Sincronizar en la nube por primera vez
+                await setDoc(docPath, {
+                    profile: userProfile,
+                    groupMatches: cleanGroupMatches,
+                    bracketState: cleanBracketState,
+                    lastUpdated: new Date().toISOString()
+                });
+
+                // Resetear estado local a limpio y luego refrescar
+                groupMatches = JSON.parse(JSON.stringify(cleanGroupMatches));
+                bracketState = JSON.parse(JSON.stringify(cleanBracketState));
+
+                // Cambio de pantalla
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-fixture').classList.remove('hidden');
+
+                renderGroupSelector();
+                renderGroupView();
+                renderBracket();
+                
+                setSyncState('synced');
+                showToast(`¡Registro exitoso! Guardado en la nube.`, "success");
+
+            } catch (err) {
+                console.error("Error al registrar:", err);
+                setSyncState('error');
+                showToast("Error al guardar en el servidor cloud.", "error");
+            }
+        }
+
+        // RECUPERAR FIXTURE EXISTENTE (RECUPERACIÓN / LOG-IN)
+        async function handleRecovery(e) {
+            e.preventDefault();
+            const phone = document.getElementById('recoveryPhone').value.trim();
+            
+            if (!phone) {
+                showToast("Ingresa un número de teléfono.", "error");
+                return;
+            }
+
+            if (!currentUser) {
+                showToast("Error: Esperando conexión con el servidor cloud.", "error");
+                return;
+            }
+
+            showToast("Buscando tus datos en el servidor...", "info");
+            const success = await fetchAndLoadPredictions(phone);
+
+            if (!success) {
+                showToast("No se encontraron registros con ese número de teléfono.", "error");
+            }
+        }
+
+        // GUARDADO AUTOMÁTICO CLOUD (REGLA 1 y REGLA 3)
+        const saveToFirestore = () => {
+            if (!currentUser || !authenticatedUserId) return;
+
+            setSyncState('saving');
+            if (saveTimeout) clearTimeout(saveTimeout);
+            
+            saveTimeout = setTimeout(async () => {
+                // Sincronización en ruta permitida pública (REGLA 1)
+                const docPath = doc(db, 'artifacts', appId, 'public', 'data', 'predictions', authenticatedUserId);
+                try {
+                    await setDoc(docPath, {
+                        profile: userProfile,
+                        groupMatches: groupMatches,
+                        bracketState: bracketState,
+                        lastUpdated: new Date().toISOString()
+                    });
+                    setSyncState('synced');
+                } catch (err) {
+                    console.error("Error guardando en Firestore:", err);
+                    setSyncState('error');
+                    showToast("Error de sincronización en la nube.", "error");
+                }
+            }, 800); // 800ms de retraso mientras el usuario escribe resultados
+        };
+
+        // CERRAR SESIÓN / SWITCH DE USUARIO
+        function logOut() {
+            localStorage.removeItem('wc_active_phone');
+            authenticatedUserId = null;
+            userProfile = { name: '', phone: '', country: '', timezoneOffset: -5 };
+
+            // Volver a pantalla 1
+            document.getElementById('main-fixture').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+
+            // Limpiar formularios
+            document.getElementById('userName').value = '';
+            document.getElementById('userPhone').value = '';
+            document.getElementById('userCountry').value = '';
+            document.getElementById('recoveryPhone').value = '';
+
+            showToast("Sesión cerrada correctamente.", "success");
+        }
+
+        // Botón Diagnóstico / Test de Firebase original (REGLA 1)
+        const testFirebaseConnection = async () => {
+            try {
+                if (!currentUser) {
+                    const credentials = await signInAnonymously(auth);
+                    currentUser = credentials.user;
+                }
+
+                showToast("Ejecutando diagnóstico de lectura y escritura...", "info");
+
+                const mockPhone = "+57 300 000 0000";
+                const phoneId = sanitizePhoneId(mockPhone);
+                const docPath = doc(db, 'artifacts', appId, 'public', 'data', 'predictions', phoneId);
+
+                await setDoc(docPath, {
+                    profile: { name: "Usuario de Prueba", phone: mockPhone, country: "Colombia", timezoneOffset: -5 },
+                    groupMatches: cleanGroupMatches,
+                    bracketState: cleanBracketState,
+                    lastUpdated: new Date().toISOString()
+                });
+
+                const docSnap = await getDoc(docPath);
+                
+                if (docSnap.exists() && docSnap.data().profile.name === "Usuario de Prueba") {
+                    document.getElementById('userName').value = "Usuario de Prueba";
+                    document.getElementById('userPhone').value = mockPhone;
+                    document.getElementById('userCountry').value = "Colombia";
+                    document.getElementById('userTimezone').value = "-5";
+                    
+                    showToast("Conexión Firestore Exitosa. UID: " + currentUser.uid, "success");
+                } else {
+                    throw new Error("No se pudo leer el documento de diagnóstico.");
+                }
+
+            } catch (err) {
+                console.error("Fallo de diagnóstico Firestore:", err);
+                showToast("Error de Diagnóstico: " + err.message, "error");
+            }
+        };
+
+        // Resetear todos los puntajes
+        async function resetScores() {
+            groupMatches = JSON.parse(JSON.stringify(cleanGroupMatches));
+            bracketState = JSON.parse(JSON.stringify(cleanBracketState));
+            renderGroupView();
+            renderBracket();
+            updateAllBracketQualifications();
+            
+            // Forzar actualización inmediata de reset en base de datos
+            saveToFirestore();
+            showToast('Se han limpiado todos los puntajes y progresiones.', 'success');
+        }
+
+        // Pestañas superiores (Grupos vs Eliminatorias)
+        function switchTab(tabId) {
+            const tabGroups = document.getElementById('tab-groups');
+            const tabBracket = document.getElementById('tab-bracket');
+            const btnGroups = document.getElementById('btn-tab-groups');
+            const btnBracket = document.getElementById('btn-tab-bracket');
+
+            if (tabId === 'tab-groups') {
+                tabGroups.classList.remove('hidden');
+                tabBracket.classList.add('hidden');
+                btnGroups.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-wcTeal text-white";
+                btnBracket.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-black/40 text-gray-400 hover:text-white";
+            } else {
+                tabGroups.classList.add('hidden');
+                tabBracket.classList.remove('hidden');
+                btnGroups.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-black/40 text-gray-400 hover:text-white";
+                btnBracket.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-wcTeal text-white";
+                updateAllBracketQualifications();
+            }
+        }
+
+        // Render selectors de Grupo (A - L)
+        function renderGroupSelector() {
+            const container = document.getElementById('group-selectors');
+            container.innerHTML = '';
+            
+            const groups = Object.keys(groupTeams);
+            groups.forEach(g => {
+                const btn = document.createElement('button');
+                btn.onclick = () => {
+                    activeGroup = g;
+                    renderGroupSelector();
+                    renderGroupView();
+                };
+                btn.className = `px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                    activeGroup === g 
+                        ? 'bg-wcTeal text-white border-wcTeal shadow-md' 
+                        : 'bg-black/30 text-gray-400 border-white/5 hover:text-white hover:border-wcGreen/50'
+                }`;
+                btn.innerText = `Grupo ${g}`;
+                container.appendChild(btn);
+            });
+        }
+
+        // Render de la Vista de Grupo (Partidos + Tabla)
+        function renderGroupView() {
+            document.getElementById('active-group-title').innerText = activeGroup;
+            
+            const matchesContainer = document.getElementById('group-matches-container');
+            matchesContainer.innerHTML = '';
+            
+            const matches = groupMatches.filter(m => m.group === activeGroup);
+            matches.forEach(m => {
+                const card = document.createElement('div');
+                card.className = "bg-wcDark/80 border border-white/5 rounded-xl p-3 flex flex-col sm:flex-row items-center justify-between gap-3 hover:border-wcTeal/30 transition-all";
+                
+                const timeString = adjustMatchTime(m.time);
+
+                card.innerHTML = `
+                    <div class="flex-1 min-w-[150px]">
+                        <span class="text-[9px] font-bold text-wcTeal block tracking-wider uppercase">${m.stadium}</span>
+                        <span class="text-[10px] text-gray-400 block mt-0.5"><i class="fa-regular fa-calendar-days mr-1"></i> ${m.date} - ${timeString}</span>
+                    </div>
+
+                    <div class="flex items-center gap-2.5">
+                        <span class="text-xs font-semibold text-right w-24 truncate" title="${m.team1}">${m.team1}</span>
+                        <input type="number" min="0" value="${m.score1}" oninput="updateGroupScore(${m.id}, 'score1', this.value)"
+                            class="w-9 h-8 text-center bg-black/60 border border-wcGreen/50 rounded-lg text-sm font-bold text-white focus:outline-none focus:ring-1 focus:ring-wcTeal">
+                        <span class="text-xs text-gray-500">-</span>
+                        <input type="number" min="0" value="${m.score2}" oninput="updateGroupScore(${m.id}, 'score2', this.value)"
+                            class="w-9 h-8 text-center bg-black/60 border border-wcGreen/50 rounded-lg text-sm font-bold text-white focus:outline-none focus:ring-1 focus:ring-wcTeal">
+                        <span class="text-xs font-semibold text-left w-24 truncate" title="${m.team2}">${m.team2}</span>
+                    </div>
+                `;
+                matchesContainer.appendChild(card);
+            });
+
+            recalculateGroupTable();
+        }
+
+        function adjustMatchTime(originalTime) {
+            try {
+                const parts = originalTime.split(':');
+                let h = parseInt(parts[0]);
+                let offsetDiff = userProfile.timezoneOffset - (-4);
+                let finalH = (h + offsetDiff) % 24;
+                if (finalH < 0) finalH += 24;
+                return `${finalH.toString().padStart(2, '0')}:${parts[1]}`;
+            } catch {
+                return originalTime;
+            }
+        }
+
+        // Actualizar resultado del grupo
+        function updateGroupScore(matchId, scoreKey, val) {
+            const match = groupMatches.find(m => m.id === matchId);
+            if (match) {
+                match[scoreKey] = val !== '' ? parseInt(val) : '';
+                renderGroupView();
+                updateAllBracketQualifications();
+                saveToFirestore(); // Guardado automático
+            }
+        }
+
+        // Recalcular posiciones del grupo en tiempo real
+        function recalculateGroupTable() {
+            const tableBody = document.getElementById('group-table-body');
+            tableBody.innerHTML = '';
+
+            const teams = groupTeams[activeGroup];
+            const matches = groupMatches.filter(m => m.group === activeGroup);
+
+            let stats = {};
+            teams.forEach(t => {
+                stats[t] = { name: t, pts: 0, pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, dg: 0 };
+            });
+
+            matches.forEach(m => {
+                if (m.score1 !== '' && m.score2 !== '') {
+                    const s1 = parseInt(m.score1);
+                    const s2 = parseInt(m.score2);
+
+                    stats[m.team1].pj++;
+                    stats[m.team2].pj++;
+                    stats[m.team1].gf += s1;
+                    stats[m.team1].gc += s2;
+                    stats[m.team2].gf += s2;
+                    stats[m.team2].gc += s1;
+
+                    if (s1 > s2) {
+                        stats[m.team1].pts += 3;
+                        stats[m.team1].pg++;
+                        stats[m.team2].pp++;
+                    } else if (s1 < s2) {
+                        stats[m.team2].pts += 3;
+                        stats[m.team2].pg++;
+                        stats[m.team1].pp++;
+                    } else {
+                        stats[m.team1].pts += 1;
+                        stats[m.team2].pts += 1;
+                        stats[m.team1].pe++;
+                        stats[m.team2].pe++;
+                    }
+
+                    stats[m.team1].dg = stats[m.team1].gf - stats[m.team1].gc;
+                    stats[m.team2].dg = stats[m.team2].gf - stats[m.team2].gc;
+                }
+            });
+
+            let sortedTeams = Object.values(stats).sort((a, b) => {
+                if (b.pts !== a.pts) return b.pts - a.pts;
+                if (b.dg !== a.dg) return b.dg - a.dg;
+                if (b.gf !== a.gf) return b.gf - a.gf;
+                return a.name.localeCompare(b.name);
+            });
+
+            sortedTeams.forEach((t, i) => {
+                const tr = document.createElement('tr');
+                tr.className = `border-b border-white/5 ${i < 2 ? 'bg-wcTeal/5' : ''}`;
+                
+                let marker = `<span class="text-gray-500 font-bold">${i+1}</span>`;
+                if (i < 2) {
+                    marker = `<span class="text-wcTeal font-bold flex items-center gap-1"><i class="fa-solid fa-circle-check text-[8px]"></i> ${i+1}</span>`;
+                } else if (i === 2) {
+                    marker = `<span class="text-wcGold font-bold flex items-center gap-1"><i class="fa-solid fa-circle-question text-[8px]"></i> ${i+1}</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td class="py-2.5 pl-2">${marker}</td>
+                    <td class="py-2.5 font-semibold text-white">${t.name}</td>
+                    <td class="py-2.5 text-center font-bold text-wcGold">${t.pts}</td>
+                    <td class="py-2.5 text-center text-gray-300">${t.pj}</td>
+                    <td class="py-2.5 text-center text-gray-400">${t.pg}</td>
+                    <td class="py-2.5 text-center text-gray-400">${t.pe}</td>
+                    <td class="py-2.5 text-center text-gray-400">${t.pp}</td>
+                    <td class="py-2.5 text-center font-semibold text-white">${t.dg >= 0 ? '+' : ''}${t.dg}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // Obtener la lista completa de clasificados generales (Fórmula de mejores terceros de tu Excel)
+        function getQualifiedTeams() {
+            let groupWinners = {};
+            let thirdPlaces = [];
+
+            Object.keys(groupTeams).forEach(g => {
+                const teams = groupTeams[g];
+                const matches = groupMatches.filter(m => m.group === g);
+                let stats = {};
+
+                teams.forEach(t => {
+                    stats[t] = { name: t, pts: 0, pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, dg: 0, group: g };
+                });
+
+                matches.forEach(m => {
+                    if (m.score1 !== '' && m.score2 !== '') {
+                        const s1 = parseInt(m.score1);
+                        const s2 = parseInt(m.score2);
+                        stats[m.team1].pj++;
+                        stats[m.team2].pj++;
+                        stats[m.team1].gf += s1;
+                        stats[m.team1].gc += s2;
+                        stats[m.team2].gf += s2;
+                        stats[m.team2].gc += s1;
+                        if (s1 > s2) {
+                            stats[m.team1].pts += 3;
+                            stats[m.team1].pg++;
+                            stats[m.team2].pp++;
+                        } else if (s1 < s2) {
+                            stats[m.team2].pts += 3;
+                            stats[m.team2].pg++;
+                            stats[m.team1].pp++;
+                        } else {
+                            stats[m.team1].pts += 1;
+                            stats[m.team2].pts += 1;
+                            stats[m.team1].pe++;
+                            stats[m.team2].pe++;
+                        }
+                        stats[m.team1].dg = stats[m.team1].gf - stats[m.team1].gc;
+                        stats[m.team2].dg = stats[m.team2].gf - stats[m.team2].gc;
+                    }
+                });
+
+                let sorted = Object.values(stats).sort((a, b) => {
+                    if (b.pts !== a.pts) return b.pts - a.pts;
+                    if (b.dg !== a.dg) return b.dg - a.dg;
+                    if (b.gf !== a.gf) return b.gf - a.gf;
+                    return a.name.localeCompare(b.name);
+                });
+
+                groupWinners[`1${g}`] = sorted[0].pj > 0 ? sorted[0].name : `1${g}`;
+                groupWinners[`2${g}`] = sorted[1].pj > 0 ? sorted[1].name : `2${g}`;
+                
+                thirdPlaces.push(sorted[2]);
+            });
+
+            let sortedThirds = thirdPlaces.sort((a, b) => {
+                if (b.pts !== a.pts) return b.pts - a.pts;
+                if (b.dg !== a.dg) return b.dg - a.dg;
+                if (b.gf !== a.gf) return b.gf - a.gf;
+                return a.name.localeCompare(b.name);
+            });
+
+            let top8Thirds = sortedThirds.slice(0, 8).map(t => t.pj > 0 ? t.name : `3${t.group}`);
+
+            return { winners: groupWinners, thirds: top8Thirds };
+        }
+
+        // Actualizar cruces de octavos / dieciseisavos
+        function updateAllBracketQualifications() {
+            const data = getQualifiedTeams();
+            const winners = data.winners;
+            const thirds = data.thirds;
+
+            // Mapear emparejamientos
+            bracketState['d1'].home = winners['1A'];
+            bracketState['d1'].away = thirds[0] || '3C/D/E/F';
+            
+            bracketState['d2'].home = winners['2B'];
+            bracketState['d2'].away = winners['2F'];
+
+            bracketState['d3'].home = winners['1E'];
+            bracketState['d3'].away = winners['2A'];
+
+            bracketState['d4'].home = winners['1I'];
+            bracketState['d4'].away = winners['2C'];
+
+            bracketState['d5'].home = winners['1C'];
+            bracketState['d5'].away = thirds[1] || '3A/B/F/G';
+
+            bracketState['d6'].home = winners['2D'];
+            bracketState['d6'].away = winners['2G'];
+
+            bracketState['d7'].home = winners['1G'];
+            bracketState['d7'].away = winners['2E'];
+
+            bracketState['d8'].home = winners['1K'];
+            bracketState['d8'].away = thirds[2] || '3E/G/H/I';
+
+            bracketState['d9'].home = winners['1B'];
+            bracketState['d9'].away = thirds[3] || '3A/D/E/H';
+
+            bracketState['d10'].home = winners['2E'];
+            bracketState['d10'].away = winners['2H'];
+
+            bracketState['d11'].home = winners['1F'];
+            bracketState['d11'].away = winners['2B'];
+
+            bracketState['d12'].home = winners['1J'];
+            bracketState['d12'].away = winners['2D'];
+
+            bracketState['d13'].home = winners['1D'];
+            bracketState['d13'].away = thirds[4] || '3B/G/H/I';
+
+            bracketState['d14'].home = winners['2I'];
+            bracketState['d14'].away = winners['2J'];
+
+            bracketState['d15'].home = winners['1H'];
+            bracketState['d15'].away = winners['2K'];
+
+            bracketState['d16'].home = winners['1L'];
+            bracketState['d16'].away = thirds[5] || '3I/J/K/L';
+
+            const bracketKeys = Object.keys(bracketState);
+            bracketKeys.forEach(k => {
+                evaluateMatchWinner(k);
+            });
+
+            renderBracket();
+        }
+
+        // Renderización de llaves de eliminación directa
+        function renderBracket() {
+            const r32 = document.getElementById('bracket-r32');
+            const r16 = document.getElementById('bracket-r16');
+            const r8 = document.getElementById('bracket-r8');
+            const r4 = document.getElementById('bracket-r4');
+            const r2 = document.getElementById('bracket-r2');
+
+            r32.innerHTML = '';
+            r16.innerHTML = '';
+            r8.innerHTML = '';
+            r4.innerHTML = '';
+            r2.innerHTML = '';
+
+            Object.keys(bracketState).forEach((key, index) => {
+                const card = createBracketCard(key, index + 1);
+                if (key.startsWith('d')) r32.appendChild(card);
+                else if (key.startsWith('o')) r16.appendChild(card);
+                else if (key.startsWith('c')) r8.appendChild(card);
+                else if (key.startsWith('s')) r4.appendChild(card);
+                else if (key.startsWith('f')) r2.appendChild(card);
+            });
+
+            // Actualizar campeón en el podio
+            const finalMatch = bracketState['f1'];
+            const championEl = document.getElementById('winner-champion');
+            let championName = '';
+
+            if (finalMatch.homeScore !== '' && finalMatch.awayScore !== '') {
+                const hs = parseInt(finalMatch.homeScore);
+                const as = parseInt(finalMatch.awayScore);
+                if (hs > as) championName = finalMatch.home;
+                else if (as > hs) championName = finalMatch.away;
+                else {
+                    const hp = parseInt(finalMatch.homePen || 0);
+                    const ap = parseInt(finalMatch.awayPen || 0);
+                    if (hp > ap) championName = finalMatch.home;
+                    else if (ap > hp) championName = finalMatch.away;
+                }
+            }
+
+            if (championName && !championName.includes('Ganador')) {
+                championEl.innerText = championName;
+                championEl.className = "wc-title text-lg text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-200 to-yellow-500 font-extrabold uppercase animate-pulse";
+            } else {
+                championEl.innerText = "Por Definir...";
+                championEl.className = "wc-title text-base text-gray-500 italic";
+            }
+        }
+
+        // Tarjeta para bracket con penaltis incluidos
+        function createBracketCard(id, num) {
+            const m = bracketState[id];
+            const isDraw = (m.homeScore !== '' && m.awayScore !== '' && parseInt(m.homeScore) === parseInt(m.awayScore));
+
+            const card = document.createElement('div');
+            card.className = "w-full bg-wcDark/80 border border-wcGreen/30 rounded-xl p-2.5 hover:border-wcTeal/50 transition-all text-xs";
+
+            const isHomeActive = m.home && !m.home.startsWith('1') && !m.home.startsWith('2') && !m.home.startsWith('3') && !m.home.startsWith('Ganador');
+            const isAwayActive = m.away && !m.away.startsWith('1') && !m.away.startsWith('2') && !m.away.startsWith('3') && !m.away.startsWith('Ganador');
+
+            card.innerHTML = `
+                <div class="flex justify-between items-center mb-1.5 text-[9px] text-gray-400">
+                    <span class="font-bold text-wcTeal uppercase">${m.title}</span>
+                    <span class="bg-black/40 px-1.5 py-0.5 rounded border border-white/5 uppercase">${m.stadium}</span>
+                </div>
+                
+                <div class="space-y-1.5">
+                    <div class="flex items-center justify-between gap-1">
+                        <span class="truncate font-medium ${isHomeActive ? 'text-white' : 'text-gray-500 italic'}" title="${m.home}">${m.home}</span>
+                        <input type="number" min="0" value="${m.homeScore}" 
+                            oninput="handleBracketScoreChange('${id}', 'home', this.value)"
+                            ${!isHomeActive ? 'disabled' : ''}
+                            class="w-8 h-7 text-center bg-black/40 border border-wcGreen/40 rounded focus:outline-none focus:border-wcTeal font-bold text-xs ${!isHomeActive ? 'opacity-30 cursor-not-allowed' : ''}">
+                    </div>
+                    <div class="flex items-center justify-between gap-1">
+                        <span class="truncate font-medium ${isAwayActive ? 'text-white' : 'text-gray-500 italic'}" title="${m.away}">${m.away}</span>
+                        <input type="number" min="0" value="${m.awayScore}" 
+                            oninput="handleBracketScoreChange('${id}', 'away', this.value)"
+                            ${!isAwayActive ? 'disabled' : ''}
+                            class="w-8 h-7 text-center bg-black/40 border border-wcGreen/40 rounded focus:outline-none focus:border-wcTeal font-bold text-xs ${!isAwayActive ? 'opacity-30 cursor-not-allowed' : ''}">
+                    </div>
+                </div>
+
+                ${isDraw ? `
+                <div class="mt-2 pt-2 border-t border-dashed border-wcTeal/20 flex flex-col items-center gap-1">
+                    <span class="text-[8px] text-yellow-400 font-bold uppercase"><i class="fa-solid fa-futbol"></i> Definición de Penaltis</span>
+                    <div class="flex items-center gap-2">
+                        <input type="number" min="0" placeholder="L" value="${m.homePen || ''}"
+                            oninput="handleBracketPenChange('${id}', 'home', this.value)"
+                            class="w-7 h-6 text-center bg-yellow-400/10 border border-yellow-400/30 text-yellow-300 font-bold text-[10px] rounded focus:outline-none">
+                        <span class="text-[9px] text-gray-500">vs</span>
+                        <input type="number" min="0" placeholder="V" value="${m.awayPen || ''}"
+                            oninput="handleBracketPenChange('${id}', 'away', this.value)"
+                            class="w-7 h-6 text-center bg-yellow-400/10 border border-yellow-400/30 text-yellow-300 font-bold text-[10px] rounded focus:outline-none">
+                    </div>
+                </div>
+                ` : ''}
+            `;
+            return card;
+        }
+
+        function handleBracketScoreChange(matchId, teamKey, value) {
+            const m = bracketState[matchId];
+            if (teamKey === 'home') {
+                m.homeScore = value !== '' ? parseInt(value) : '';
+            } else {
+                m.awayScore = value !== '' ? parseInt(value) : '';
+            }
+
+            m.homePen = '';
+            m.awayPen = '';
+
+            evaluateMatchWinner(matchId);
+            saveToFirestore();
+        }
+
+        function handleBracketPenChange(matchId, teamKey, value) {
+            const m = bracketState[matchId];
+            if (teamKey === 'home') {
+                m.homePen = value !== '' ? parseInt(value) : '';
+            } else {
+                m.awayPen = value !== '' ? parseInt(value) : '';
+            }
+            evaluateMatchWinner(matchId);
+            saveToFirestore();
+        }
+
+        function evaluateMatchWinner(matchId) {
+            const m = bracketState[matchId];
+            let winner = '';
+
+            if (m.homeScore !== '' && m.awayScore !== '') {
+                const hs = parseInt(m.homeScore);
+                const as = parseInt(m.awayScore);
+
+                if (hs > as) {
+                    winner = m.home;
+                } else if (as > hs) {
+                    winner = m.away;
+                } else {
+                    const hp = m.homePen !== '' ? parseInt(m.homePen) : '';
+                    const ap = m.awayPen !== '' ? parseInt(m.awayPen) : '';
+                    if (hp !== '' && ap !== '') {
+                        if (hp > ap) winner = m.home;
+                        else if (ap > hp) winner = m.away;
+                    }
+                }
+            }
+
+            propagateBracketWinner(m, winner);
+        }
+
+        function propagateBracketWinner(currentMatch, winner) {
+            const nextId = currentMatch.next;
+            if (!nextId) return;
+
+            if (nextId === 'champion') {
+                renderBracket();
+                return;
+            }
+
+            const nextMatch = bracketState[nextId];
+            const slot = currentMatch.slot;
+
+            const previousWinner = nextMatch[slot];
+            nextMatch[slot] = winner || `Ganador ${currentMatch.title}`;
+
+            if (previousWinner !== winner) {
+                nextMatch.homeScore = '';
+                nextMatch.awayScore = '';
+                nextMatch.homePen = '';
+                nextMatch.awayPen = '';
+                propagateBracketWinner(nextMatch, '');
+            }
+
+            renderBracket();
+        }
+
+        // Estado del Sincronizador visual
+        const setSyncState = (state) => {
+            const indicator = document.getElementById('sync-indicator');
+            if (!indicator) return;
+
+            if (state === 'saving') {
+                indicator.className = "text-[9px] bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-2 py-0.5 rounded-md flex items-center gap-1";
+                indicator.innerHTML = `<i class="fa-solid fa-rotate animate-spin"></i> Guardando...`;
+            } else if (state === 'synced') {
+                indicator.className = "text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-md flex items-center gap-1";
+                indicator.innerHTML = `<i class="fa-solid fa-cloud"></i> Sincronizado`;
+            } else if (state === 'error') {
+                indicator.className = "text-[9px] bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded-md flex items-center gap-1";
+                indicator.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Error de sincronización`;
+            }
+        };
+
+        // Exponer funciones necesarias al objeto global Window
+        window.changeProfile = logOut;
+        window.logOut = logOut;
+        window.resetScores = resetScores;
+        window.switchTab = switchTab;
+        window.updateGroupScore = updateGroupScore;
+        window.handleBracketScoreChange = handleBracketScoreChange;
+        window.handleBracketPenChange = handleBracketPenChange;
+        window.testFirebaseConnection = testFirebaseConnection;
+        window.toggleAuthMode = toggleAuthMode;
+        
+        // Exponer explícitamente las funciones de autenticación/registro (Solución al ReferenceError)
+        window.handleRegistration = handleRegistration;
+        window.handleRecovery = handleRecovery;
+
+        // Iniciar autenticación al arrancar la página
+        window.addEventListener('DOMContentLoaded', () => {
+            initAuthAndFirestore();
+        });
+    </script>
+</body>
+</html>
