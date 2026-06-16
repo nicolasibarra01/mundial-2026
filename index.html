@@ -604,7 +604,7 @@
             'c4': { home: 'Ganador O7', away: 'Ganador O8', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 's2', slot: 'away', title: 'Cuartos #4', stadium: 'Kansas City' },
 
             's1': { home: 'Ganador C1', away: 'Ganador C2', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'f1', slot: 'home', title: 'Semifinal #1', stadium: 'Dallas' },
-            's2': { home: 'Ganador C3', away: 'Ganador C4', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'f1', slot: 'away', title: 'Semifinal #2', stadium: 'Atlanta' },
+            's2': { home: 'Ganador C3', away: 'Ganador C4', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 's2', slot: 'away', title: 'Semifinal #2', stadium: 'Atlanta' },
 
             'f1': { home: 'Ganador S1', away: 'Ganador S2', homeScore: '', awayScore: '', homePen: '', awayPen: '', next: 'champion', slot: 'home', title: 'Gran Final', stadium: 'Nueva York/Nueva Jersey' }
         };
@@ -631,6 +631,37 @@
                 formLoad.classList.remove('hidden');
             }
         };
+
+        // ALGORITMO DE MIGRACIÓN: Corrige en tiempo real los datos antiguos recuperados de la nube con IDs corruptos o duplicados
+        function migrateGroupMatches(loadedMatches) {
+            if (!Array.isArray(loadedMatches)) return JSON.parse(JSON.stringify(cleanGroupMatches));
+            
+            // Generamos una copia idéntica del esquema limpio y garantizado (IDs 1-72 sin duplicados)
+            const stableMatches = JSON.parse(JSON.stringify(cleanGroupMatches));
+            
+            loadedMatches.forEach(loaded => {
+                if (!loaded || !loaded.group || !loaded.team1 || !loaded.team2) return;
+                
+                // Buscamos coincidencia inequívoca por grupo y nombre de equipos
+                const found = stableMatches.find(stable => 
+                    stable.group === loaded.group && 
+                    stable.team1.trim().toUpperCase() === loaded.team1.trim().toUpperCase() &&
+                    stable.team2.trim().toUpperCase() === loaded.team2.trim().toUpperCase()
+                );
+                
+                if (found) {
+                    found.score1 = (loaded.score1 !== undefined && loaded.score1 !== null && loaded.score1 !== "") ? parseInt(loaded.score1) : '';
+                    found.score2 = (loaded.score2 !== undefined && loaded.score2 !== null && loaded.score2 !== "") ? parseInt(loaded.score2) : '';
+                }
+            });
+            
+            return stableMatches;
+        }
+
+        // Sanitizador de teléfono para utilizarlo como userId seguro en la ruta de Firestore
+        function sanitizePhoneId(phone) {
+            return phone.trim().replace(/[^a-zA-Z0-9]/g, '');
+        }
 
         // Inicializar Autenticación Anónima (REGLA 3)
         const initAuthAndFirestore = async () => {
@@ -666,11 +697,6 @@
             }
         };
 
-        // Sanitizador de teléfono para utilizarlo como userId seguro en la ruta de Firestore
-        function sanitizePhoneId(phone) {
-            return phone.trim().replace(/[^a-zA-Z0-9]/g, '');
-        }
-
         // CARGAR PREDICCIÓN DESDE LA BASE DE DATOS (REGLA 1 & REGLA 3)
         async function fetchAndLoadPredictions(phone) {
             if (!currentUser) return false;
@@ -699,8 +725,13 @@
                         document.getElementById('profile-timezone').innerText = `Zona Horaria: UTC ${userProfile.timezoneOffset >= 0 ? '+' : ''}${userProfile.timezoneOffset}`;
                     }
 
-                    // Restaurar marcadores
-                    if (data.groupMatches) groupMatches = data.groupMatches;
+                    // Restaurar marcadores aplicando la migración robusta
+                    if (data.groupMatches) {
+                        groupMatches = migrateGroupMatches(data.groupMatches);
+                    } else {
+                        groupMatches = JSON.parse(JSON.stringify(cleanGroupMatches));
+                    }
+                    
                     if (data.bracketState) bracketState = data.bracketState;
 
                     // Confirmar inicio de sesión
@@ -713,8 +744,8 @@
                     
                     renderGroupSelector();
                     renderGroupView();
+                    updateAllBracketQualifications(); // Re-evalúa y re-propaga con la lógica robusta de ganadores resueltos
                     renderBracket();
-                    updateAllBracketQualifications();
 
                     showToast("¡Fixture recuperado y cargado en tiempo real!", "success");
                     return true;
@@ -914,8 +945,8 @@
             groupMatches = JSON.parse(JSON.stringify(cleanGroupMatches));
             bracketState = JSON.parse(JSON.stringify(cleanBracketState));
             renderGroupView();
-            renderBracket();
             updateAllBracketQualifications();
+            renderBracket();
             
             // Forzar actualización inmediata de reset en base de datos
             saveToFirestore();
@@ -1026,9 +1057,10 @@
             }
         }
 
-        // Recalcular posiciones del grupo en tiempo real
+        // Recalcular posiciones del grupo en tiempo real (Protección robusta contra NaN y Nulos)
         function recalculateGroupTable() {
             const tableBody = document.getElementById('group-table-body');
+            if (!tableBody) return;
             tableBody.innerHTML = '';
 
             const teams = groupTeams[activeGroup];
@@ -1040,34 +1072,41 @@
             });
 
             matches.forEach(m => {
-                if (m.score1 !== '' && m.score2 !== '') {
-                    const s1 = parseInt(m.score1);
-                    const s2 = parseInt(m.score2);
+                const s1 = m.score1;
+                const s2 = m.score2;
 
-                    stats[m.team1].pj++;
-                    stats[m.team2].pj++;
-                    stats[m.team1].gf += s1;
-                    stats[m.team1].gc += s2;
-                    stats[m.team2].gf += s2;
-                    stats[m.team2].gc += s1;
+                if (s1 !== '' && s1 !== null && s1 !== undefined &&
+                    s2 !== '' && s2 !== null && s2 !== undefined) {
+                    
+                    const num1 = parseInt(s1);
+                    const num2 = parseInt(s2);
 
-                    if (s1 > s2) {
-                        stats[m.team1].pts += 3;
-                        stats[m.team1].pg++;
-                        stats[m.team2].pp++;
-                    } else if (s1 < s2) {
-                        stats[m.team2].pts += 3;
-                        stats[m.team2].pg++;
-                        stats[m.team1].pp++;
-                    } else {
-                        stats[m.team1].pts += 1;
-                        stats[m.team2].pts += 1;
-                        stats[m.team1].pe++;
-                        stats[m.team2].pe++;
+                    if (!isNaN(num1) && !isNaN(num2)) {
+                        stats[m.team1].pj++;
+                        stats[m.team2].pj++;
+                        stats[m.team1].gf += num1;
+                        stats[m.team1].gc += num2;
+                        stats[m.team2].gf += num2;
+                        stats[m.team2].gc += num1;
+
+                        if (num1 > num2) {
+                            stats[m.team1].pts += 3;
+                            stats[m.team1].pg++;
+                            stats[m.team2].pp++;
+                        } else if (num1 < num2) {
+                            stats[m.team2].pts += 3;
+                            stats[m.team2].pg++;
+                            stats[m.team1].pp++;
+                        } else {
+                            stats[m.team1].pts += 1;
+                            stats[m.team2].pts += 1;
+                            stats[m.team1].pe++;
+                            stats[m.team2].pe++;
+                        }
+
+                        stats[m.team1].dg = stats[m.team1].gf - stats[m.team1].gc;
+                        stats[m.team2].dg = stats[m.team2].gf - stats[m.team2].gc;
                     }
-
-                    stats[m.team1].dg = stats[m.team1].gf - stats[m.team1].gc;
-                    stats[m.team2].dg = stats[m.team2].gf - stats[m.team2].gc;
                 }
             });
 
@@ -1103,7 +1142,7 @@
             });
         }
 
-        // Obtener la lista completa de clasificados generales (Fórmula de mejores terceros de tu Excel)
+        // Obtener clasificados generales de grupos (Protección robusta contra NaN y Nulos)
         function getQualifiedTeams() {
             let groupWinners = {};
             let thirdPlaces = [];
@@ -1118,31 +1157,40 @@
                 });
 
                 matches.forEach(m => {
-                    if (m.score1 !== '' && m.score2 !== '') {
-                        const s1 = parseInt(m.score1);
-                        const s2 = parseInt(m.score2);
-                        stats[m.team1].pj++;
-                        stats[m.team2].pj++;
-                        stats[m.team1].gf += s1;
-                        stats[m.team1].gc += s2;
-                        stats[m.team2].gf += s2;
-                        stats[m.team2].gc += s1;
-                        if (s1 > s2) {
-                            stats[m.team1].pts += 3;
-                            stats[m.team1].pg++;
-                            stats[m.team2].pp++;
-                        } else if (s1 < s2) {
-                            stats[m.team2].pts += 3;
-                            stats[m.team2].pg++;
-                            stats[m.team1].pp++;
-                        } else {
-                            stats[m.team1].pts += 1;
-                            stats[m.team2].pts += 1;
-                            stats[m.team1].pe++;
-                            stats[m.team2].pe++;
+                    const s1 = m.score1;
+                    const s2 = m.score2;
+
+                    if (s1 !== '' && s1 !== null && s1 !== undefined &&
+                        s2 !== '' && s2 !== null && s2 !== undefined) {
+                        
+                        const num1 = parseInt(s1);
+                        const num2 = parseInt(s2);
+
+                        if (!isNaN(num1) && !isNaN(num2)) {
+                            stats[m.team1].pj++;
+                            stats[m.team2].pj++;
+                            stats[m.team1].gf += num1;
+                            stats[m.team1].gc += num2;
+                            stats[m.team2].gf += num2;
+                            stats[m.team2].gc += num1;
+                            
+                            if (num1 > num2) {
+                                stats[m.team1].pts += 3;
+                                stats[m.team1].pg++;
+                                stats[m.team2].pp++;
+                            } else if (num1 < num2) {
+                                stats[m.team2].pts += 3;
+                                stats[m.team2].pg++;
+                                stats[m.team1].pp++;
+                            } else {
+                                stats[m.team1].pts += 1;
+                                stats[m.team2].pts += 1;
+                                stats[m.team1].pe++;
+                                stats[m.team2].pe++;
+                            }
+                            stats[m.team1].dg = stats[m.team1].gf - stats[m.team1].gc;
+                            stats[m.team2].dg = stats[m.team2].gf - stats[m.team2].gc;
                         }
-                        stats[m.team1].dg = stats[m.team1].gf - stats[m.team1].gc;
-                        stats[m.team2].dg = stats[m.team2].gf - stats[m.team2].gc;
                     }
                 });
 
@@ -1153,7 +1201,7 @@
                     return a.name.localeCompare(b.name);
                 });
 
-                // Si no se han jugado partidos aún en el grupo, mantenemos la etiqueta por defecto
+                // Si no se han jugado partidos aún en el grupo, mantenemos la etiqueta de la plaza
                 const hasPlayed = sorted.some(team => team.pj > 0);
                 groupWinners[`1${g}`] = hasPlayed ? sorted[0].name : `1${g}`;
                 groupWinners[`2${g}`] = hasPlayed ? sorted[1].name : `2${g}`;
@@ -1228,6 +1276,7 @@
             bracketState['d16'].home = winners['1L'];
             bracketState['d16'].away = thirds[5] || '3I/J/K/L';
 
+            // Evalúa todos los partidos del árbol en orden topológico correcto
             const bracketKeys = Object.keys(bracketState);
             bracketKeys.forEach(k => {
                 evaluateMatchWinner(k);
@@ -1370,20 +1419,32 @@
             const m = bracketState[matchId];
             let winner = '';
 
-            if (m.homeScore !== '' && m.awayScore !== '') {
-                const hs = parseInt(m.homeScore);
-                const as = parseInt(m.awayScore);
+            const hs = m.homeScore;
+            const as = m.awayScore;
 
-                if (hs > as) {
-                    winner = m.home;
-                } else if (as > hs) {
-                    winner = m.away;
-                } else {
-                    const hp = m.homePen !== '' ? parseInt(m.homePen) : '';
-                    const ap = m.awayPen !== '' ? parseInt(m.awayPen) : '';
-                    if (hp !== '' && ap !== '') {
-                        if (hp > ap) winner = m.home;
-                        else if (ap > hp) winner = m.away;
+            if (hs !== '' && hs !== null && hs !== undefined &&
+                as !== '' && as !== null && as !== undefined) {
+                
+                const numH = parseInt(hs);
+                const numA = parseInt(as);
+
+                if (!isNaN(numH) && !isNaN(numA)) {
+                    if (numH > numA) {
+                        winner = m.home;
+                    } else if (numA > numH) {
+                        winner = m.away;
+                    } else {
+                        const hp = m.homePen;
+                        const ap = m.awayPen;
+                        if (hp !== '' && hp !== null && hp !== undefined &&
+                            ap !== '' && ap !== null && ap !== undefined) {
+                            const numHP = parseInt(hp);
+                            const numAP = parseInt(ap);
+                            if (!isNaN(numHP) && !isNaN(numAP)) {
+                                if (numHP > numAP) winner = m.home;
+                                else if (numAP > numHP) winner = m.away;
+                            }
+                        }
                     }
                 }
             }
@@ -1391,6 +1452,7 @@
             propagateBracketWinner(m, winner);
         }
 
+        // PROPAGACIÓN DE CLASIFICADOS OPTIMIZADA: Compara ganadores ya resueltos para evitar reseteos en cascada en la carga.
         function propagateBracketWinner(currentMatch, winner) {
             const nextId = currentMatch.next;
             if (!nextId) return;
@@ -1404,9 +1466,14 @@
             const slot = currentMatch.slot;
 
             const previousWinner = nextMatch[slot];
-            nextMatch[slot] = winner || `Ganador ${currentMatch.title}`;
+            const resolvedWinner = winner || `Ganador ${currentMatch.title}`;
+            
+            // Asigna el nombre o etiqueta resuelta
+            nextMatch[slot] = resolvedWinner;
 
-            if (previousWinner !== winner) {
+            // Al comparar resolvedWinner y previousWinner (por ejemplo, ambos vacíos se resuelven como "Ganador Dieciseisavos #1")
+            // evitamos reseteos accidentales en fases superiores al cargar o recuperar sesión.
+            if (previousWinner !== resolvedWinner) {
                 nextMatch.homeScore = '';
                 nextMatch.awayScore = '';
                 nextMatch.homePen = '';
@@ -1445,6 +1512,7 @@
         window.testFirebaseConnection = testFirebaseConnection;
         window.handleRegistration = handleRegistration;
         window.handleRecovery = handleRecovery;
+        window.toggleAuthMode = toggleAuthMode;
 
         // Iniciar autenticación al arrancar la página
         window.addEventListener('DOMContentLoaded', () => {
