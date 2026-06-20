@@ -156,9 +156,43 @@
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400">
                                 <i class="fa-solid fa-globe"></i>
                             </span>
-                            <input type="text" id="userCountry" required 
-                                class="w-full pl-10 pr-4 py-2.5 bg-black/40 border border-wcGreen/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-wcTeal focus:border-transparent text-white text-sm" 
-                                placeholder="Ej. Colombia">
+                            <select id="userCountry" required 
+                                class="w-full pl-10 pr-4 py-2.5 bg-black/40 border border-wcGreen/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-wcTeal focus:border-transparent text-white text-sm appearance-none cursor-pointer">
+                                <option value="Antigua y Barbuda">Antigua y Barbuda</option>
+                                <option value="Argentina">Argentina</option>
+                                <option value="Bahamas">Bahamas</option>
+                                <option value="Barbados">Barbados</option>
+                                <option value="Belice">Belice</option>
+                                <option value="Bolivia">Bolivia</option>
+                                <option value="Brasil">Brasil</option>
+                                <option value="Canadá">Canadá</option>
+                                <option value="Chile">Chile</option>
+                                <option value="Colombia" selected>Colombia</option>
+                                <option value="Costa Rica">Costa Rica</option>
+                                <option value="Cuba">Cuba</option>
+                                <option value="Ecuador">Ecuador</option>
+                                <option value="El Salvador">El Salvador</option>
+                                <option value="Estados Unidos">Estados Unidos</option>
+                                <option value="Granada">Granada</option>
+                                <option value="Guatemala">Guatemala</option>
+                                <option value="Guyana">Guyana</option>
+                                <option value="Haití">Haití</option>
+                                <option value="Honduras">Honduras</option>
+                                <option value="Jamaica">Jamaica</option>
+                                <option value="México">México</option>
+                                <option value="Nicaragua">Nicaragua</option>
+                                <option value="Panamá">Panamá</option>
+                                <option value="Paraguay">Paraguay</option>
+                                <option value="Perú">Perú</option>
+                                <option value="República Dominicana">República Dominicana</option>
+                                <option value="San Cristóbal y Nieves">San Cristóbal y Nieves</option>
+                                <option value="San Vicente y las Granadinas">San Vicente y las Granadinas</option>
+                                <option value="Santa Lucía">Santa Lucía</option>
+                                <option value="Surinam">Surinam</option>
+                                <option value="Trinidad y Tobago">Trinidad y Tobago</option>
+                                <option value="Uruguay">Uruguay</option>
+                                <option value="Venezuela">Venezuela</option>
+                            </select>
                         </div>
                     </div>
 
@@ -169,7 +203,7 @@
                                 <i class="fa-solid fa-clock"></i>
                             </span>
                             <select id="userTimezone" class="w-full pl-10 pr-4 py-2.5 bg-black/40 border border-wcGreen/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-wcTeal focus:border-transparent text-white text-sm appearance-none cursor-pointer">
-                                <option value="-5">Colombia, Perú, Ecuador, México (CDMX) (UTC-5)</option>
+                                <option value="-5" selected>Colombia, Perú, Ecuador, México (CDMX) (UTC-5)</option>
                                 <option value="-3">Argentina, Brasil (Brasilia), Uruguay (UTC-3)</option>
                                 <option value="-4">Estados Unidos (Este - Miami/NY), Chile, Bolivia, Venezuela (UTC-4)</option>
                                 <option value="-6">Estados Unidos (Centro), Centroamérica (UTC-6)</option>
@@ -432,7 +466,7 @@
         let currentUser = null;
         let saveTimeout = null;
         let authenticatedUserId = null; // ID único del documento basado en el teléfono del usuario
-        let userProfile = { name: '', phone: '', country: '', timezoneOffset: -5 };
+        let userProfile = { name: '', phone: '', country: 'Colombia', timezoneOffset: -5 };
         let activeGroup = 'A'; // Declaración de la variable para el control del grupo activo
 
         // Exponer la función de Toast en el objeto global Window INMEDIATAMENTE para evitar ReferenceError
@@ -500,9 +534,9 @@
             { id: 12, group: 'B', date: '2026-06-24', time: '15:00', team1: 'BOSNIA y HERZEG.', team2: 'CATAR', stadium: 'Estadio Seattle', score1: '', score2: '' },
 
             { id: 13, group: 'C', date: '2026-06-13', time: '18:00', team1: 'BRASIL', team2: 'MARRUECOS', stadium: 'Estadio Nueva York/Nueva Jersey', score1: '', score2: '' },
-            { id: 14, group: 'C', date: '2026-06-13', time: '21:00', team1: 'ESCOCIA', team2: 'HAITÍ', stadium: 'Estadio Boston', score1: '', score2: '' },
-            { id: 15, group: 'C', date: '2026-06-16', time: '18:00', team1: 'BRASIL', team2: 'ESCOCIA', stadium: 'Estadio Nueva York/Nueva Jersey', score1: '', score2: '' },
-            { id: 16, group: 'C', date: '2026-06-16', time: '21:00', team1: 'MARRUECOS', team2: 'HAITÍ', stadium: 'Estadio Filadelfia', score1: '', score2: '' },
+            { id: 14, group: 'C', date: '2026-06-13', time: '21:00', team1: 'HAITÍ', team2: 'ESCOCIA', stadium: 'Estadio Boston', score1: '', score2: '' },
+            { id: 15, group: 'C', date: '2026-06-19', time: '18:00', team1: 'ESCOCIA', team2: 'MARRUECOS', stadium: 'Estadio Boston', score1: '', score2: '' },
+            { id: 16, group: 'C', date: '2026-06-19', time: '20:30', team1: 'BRASIL', team2: 'HAITÍ', stadium: 'Estadio Filadelfia', score1: '', score2: '' },
             { id: 17, group: 'C', date: '2026-06-24', time: '18:00', team1: 'ESCOCIA', team2: 'BRASIL', stadium: 'Estadio Miami', score1: '', score2: '' },
             { id: 18, group: 'C', date: '2026-06-24', time: '18:00', team1: 'MARRUECOS', team2: 'HAITÍ', stadium: 'Estadio Atlanta', score1: '', score2: '' },
 
@@ -765,7 +799,7 @@
             
             const name = document.getElementById('userName').value.trim();
             const phone = document.getElementById('userPhone').value.trim();
-            const country = document.getElementById('userCountry').value.trim();
+            const country = document.getElementById('userCountry').value; // Ahora obtiene el departamento seleccionado
             const timezone = parseInt(document.getElementById('userTimezone').value);
 
             const phoneId = sanitizePhoneId(phone);
@@ -885,7 +919,7 @@
         function logOut() {
             localStorage.removeItem('wc_active_phone');
             authenticatedUserId = null;
-            userProfile = { name: '', phone: '', country: '', timezoneOffset: -5 };
+            userProfile = { name: '', phone: '', country: 'Colombia', timezoneOffset: -5 };
 
             // Volver a pantalla 1
             document.getElementById('main-fixture').classList.add('hidden');
@@ -894,7 +928,7 @@
             // Limpiar formularios
             document.getElementById('userName').value = '';
             document.getElementById('userPhone').value = '';
-            document.getElementById('userCountry').value = '';
+            document.getElementById('userCountry').value = 'Colombia';
             document.getElementById('recoveryPhone').value = '';
 
             showToast("Sesión cerrada correctamente.", "success");
@@ -1471,7 +1505,7 @@
             // Asigna el nombre o etiqueta resuelta
             nextMatch[slot] = resolvedWinner;
 
-            // Al comparar resolvedWinner y previousWinner (por ejemplo, ambos vacíos se resuelven como "Ganador Dieciseisavos #1")
+            // Al comparar resolvedWinner and previousWinner (por ejemplo, ambos vacíos se resuelven como "Ganador Dieciseisavos #1")
             // evitamos reseteos accidentales en fases superiores al cargar o recuperar sesión.
             if (previousWinner !== resolvedWinner) {
                 nextMatch.homeScore = '';
