@@ -440,7 +440,6 @@
 
     <!-- SCRIPT PRINCIPAL CON INTEGRACIÓN FIRESTORE SDK MODULE -->
     <script type="module">
-        // Importación de Firebase SDK modular moderno (v11)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -541,65 +540,65 @@
             { id: 18, group: 'C', date: '2026-06-24', time: '18:00', team1: 'MARRUECOS', team2: 'HAITÍ', stadium: 'Estadio Atlanta', score1: '', score2: '' },
 
             { id: 19, group: 'D', date: '2026-06-12', time: '21:00', team1: 'ESTADOS UNIDOS', team2: 'PARAGUAY', stadium: 'Estadio Los Angeles', score1: '', score2: '' },
-            { id: 20, group: 'D', date: '2026-06-13', time: '23:59', team1: 'TURQUÍA', team2: 'AUSTRALIA', stadium: 'Estadio Seattle', score1: '', score2: '' },
-            { id: 21, group: 'D', date: '2026-06-18', time: '19:00', team1: 'ESTADOS UNIDOS', team2: 'TURQUÍA', stadium: 'Estadio Los Angeles', score1: '', score2: '' },
-            { id: 22, group: 'D', date: '2026-06-18', time: '22:00', team1: 'PARAGUAY', team2: 'AUSTRALIA', stadium: 'Estadio San Francisco', score1: '', score2: '' },
+            { id: 20, group: 'D', date: '2026-06-14', time: '00:00', team1: 'AUSTRALIA', team2: 'TURQUÍA', stadium: 'Estadio Vancouver', score1: '', score2: '' },
+            { id: 21, group: 'D', date: '2026-06-19', time: '15:00', team1: 'ESTADOS UNIDOS', team2: 'AUSTRALIA', stadium: 'Estadio Seattle', score1: '', score2: '' },
+            { id: 22, group: 'D', date: '2026-06-19', time: '23:00', team1: 'TURQUÍA', team2: 'PARAGUAY', stadium: 'Estadio San Francisco', score1: '', score2: '' },
             { id: 23, group: 'D', date: '2026-06-25', time: '22:00', team1: 'TURQUÍA', team2: 'ESTADOS UNIDOS', stadium: 'Estadio Los Angeles', score1: '', score2: '' },
             { id: 24, group: 'D', date: '2026-06-25', time: '22:00', team1: 'PARAGUAY', team2: 'AUSTRALIA', stadium: 'Estadio San Francisco', score1: '', score2: '' },
 
             { id: 25, group: 'E', date: '2026-06-14', time: '13:00', team1: 'ALEMANIA', team2: 'CURAZAO', stadium: 'Estadio Houston', score1: '', score2: '' },
-            { id: 26, group: 'E', date: '2026-06-14', time: '19:00', team1: 'COSTA de MARFIL', team2: 'ECUADOR', stadium: 'Estadio Monterrey', score1: '', score2: '' },
-            { id: 27, group: 'E', date: '2026-06-19', time: '13:00', team1: 'ALEMANIA', team2: 'COSTA de MARFIL', stadium: 'Estadio Filadelfia', score1: '', score2: '' },
-            { id: 28, group: 'E', date: '2026-06-19', time: '16:00', team1: 'CURAZAO', team2: 'ECUADOR', stadium: 'Estadio Boston', score1: '', score2: '' },
+            { id: 26, group: 'E', date: '2026-06-14', time: '19:00', team1: 'COSTA de MARFIL', team2: 'ECUADOR', stadium: 'Estadio Filadelfia', score1: '', score2: '' },
+            { id: 27, group: 'E', date: '2026-06-20', time: '16:00', team1: 'ALEMANIA', team2: 'COSTA de MARFIL', stadium: 'Estadio Toronto', score1: '', score2: '' },
+            { id: 28, group: 'E', date: '2026-06-20', time: '20:00', team1: 'ECUADOR', team2: 'CURAZAO', stadium: 'Estadio Kansas City', score1: '', score2: '' },
             { id: 29, group: 'E', date: '2026-06-25', time: '16:00', team1: 'CURAZAO', team2: 'COSTA de MARFIL', stadium: 'Estadio Filadelfia', score1: '', score2: '' },
             { id: 30, group: 'E', date: '2026-06-25', time: '16:00', team1: 'ECUADOR', team2: 'ALEMANIA', stadium: 'Estadio Nueva York/Nueva Jersey', score1: '', score2: '' },
 
             { id: 31, group: 'F', date: '2026-06-14', time: '16:00', team1: 'PAÍSES BAJOS', team2: 'JAPÓN', stadium: 'Estadio Dallas', score1: '', score2: '' },
-            { id: 32, group: 'F', date: '2026-06-14', time: '22:00', team1: 'TÚNEZ', team2: 'SUECIA', stadium: 'Estadio San Francisco', score1: '', score2: '' },
-            { id: 33, group: 'F', date: '2026-06-19', time: '19:00', team1: 'PAÍSES BAJOS', team2: 'TÚNEZ', stadium: 'Estadio Dallas', score1: '', score2: '' },
-            { id: 34, group: 'F', date: '2026-06-19', time: '22:00', team1: 'JAPÓN', team2: 'SUECIA', stadium: 'Estadio Seattle', score1: '', score2: '' },
+            { id: 32, group: 'F', date: '2026-06-14', time: '22:00', team1: 'SUECIA', team2: 'TÚNEZ', stadium: 'Estadio Monterrey', score1: '', score2: '' },
+            { id: 33, group: 'F', date: '2026-06-20', time: '13:00', team1: 'PAÍSES BAJOS', team2: 'SUECIA', stadium: 'Estadio Houston', score1: '', score2: '' },
+            { id: 34, group: 'F', date: '2026-06-21', time: '00:00', team1: 'TÚNEZ', team2: 'JAPÓN', stadium: 'Estadio Monterrey', score1: '', score2: '' },
             { id: 35, group: 'F', date: '2026-06-25', time: '19:00', team1: 'JAPÓN', team2: 'SUECIA', stadium: 'Estadio Dallas', score1: '', score2: '' },
             { id: 36, group: 'F', date: '2026-06-25', time: '19:00', team1: 'TÚNEZ', team2: 'PAÍSES BAJOS', stadium: 'Estadio Kansas City', score1: '', score2: '' },
 
-            { id: 37, group: 'G', date: '2026-06-15', time: '15:00', team1: 'BÉLGICA', team2: 'EGIPTO', stadium: 'Estadio Seattle', score1: '', score2: '' },
-            { id: 38, group: 'G', date: '2026-06-15', time: '21:00', team1: 'IRÁN', team2: 'NUEVA ZELANDA', stadium: 'Estadio Los Angeles', score1: '', score2: '' },
-            { id: 39, group: 'G', date: '2026-06-20', time: '12:00', team1: 'BÉLGICA', team2: 'IRÁN', stadium: 'Estadio Vancouver', score1: '', score2: '' },
-            { id: 40, group: 'G', date: '2026-06-20', time: '15:00', team1: 'EGIPTO', team2: 'NUEVA ZELANDA', stadium: 'Estadio Seattle', score1: '', score2: '' },
-            { id: 41, group: 'G', date: '2026-06-26', time: '23:00', team1: 'EGIPTO', team2: 'IRÁN', stadium: 'Estadio Seattle', score1: '', score2: '' },
-            { id: 42, group: 'G', date: '2026-06-26', time: '23:00', team1: 'NUEVA ZELANDA', team2: 'BÉLGICA', stadium: 'Estadio Vancouver', score1: '', score2: '' },
+            { id: 37, group: 'G', date: '2026-06-15', time: '16:00', team1: 'BÉLGICA', team2: 'EGIPTO', stadium: 'Estadio Seattle', score1: '', score2: '' },
+            { id: 38, group: 'G', date: '2026-06-15', time: '20:00', team1: 'IRÁN', team2: 'NUEVA ZELANDA', stadium: 'Estadio Los Angeles', score1: '', score2: '' },
+            { id: 39, group: 'G', date: '2026-06-20', time: '14:00', team1: 'BÉLGICA', team2: 'IRÁN', stadium: 'Estadio Vancouver', score1: '', score2: '' },
+            { id: 40, group: 'G', date: '2026-06-20', time: '18:00', team1: 'EGIPTO', team2: 'NUEVA ZELANDA', stadium: 'Estadio Seattle', score1: '', score2: '' },
+            { id: 41, group: 'G', date: '2026-06-26', time: '20:00', team1: 'EGIPTO', team2: 'IRÁN', stadium: 'Estadio Atlanta', score1: '', score2: '' },
+            { id: 42, group: 'G', date: '2026-06-26', time: '20:00', team1: 'NUEVA ZELANDA', team2: 'BÉLGICA', stadium: 'Estadio San Francisco', score1: '', score2: '' },
 
             { id: 43, group: 'H', date: '2026-06-15', time: '12:00', team1: 'ESPAÑA', team2: 'CABO VERDE', stadium: 'Estadio Atlanta', score1: '', score2: '' },
-            { id: 44, group: 'H', date: '2026-06-15', time: '18:00', team1: 'URUGUAY', team2: 'ARABIA SAUDITA', stadium: 'Estadio Dallas', score1: '', score2: '' },
-            { id: 45, group: 'H', date: '2026-06-20', time: '18:00', team1: 'ESPAÑA', team2: 'URUGUAY', stadium: 'Estadio Miami', score1: '', score2: '' },
-            { id: 46, group: 'H', date: '2026-06-20', time: '21:00', team1: 'CABO VERDE', team2: 'ARABIA SAUDITA', stadium: 'Estadio Houston', score1: '', score2: '' },
+            { id: 44, group: 'H', date: '2026-06-15', time: '18:00', team1: 'ARABIA SAUDITA', team2: 'URUGUAY', stadium: 'Estadio Miami', score1: '', score2: '' },
+            { id: 45, group: 'H', date: '2026-06-21', time: '12:00', team1: 'ESPAÑA', team2: 'ARABIA SAUDITA', stadium: 'Estadio Atlanta', score1: '', score2: '' },
+            { id: 46, group: 'H', date: '2026-06-21', time: '18:00', team1: 'URUGUAY', team2: 'CABO VERDE', stadium: 'Estadio Miami', score1: '', score2: '' },
             { id: 47, group: 'H', date: '2026-06-26', time: '20:00', team1: 'CABO VERDE', team2: 'ARABIA SAUDITA', stadium: 'Estadio Houston', score1: '', score2: '' },
             { id: 48, group: 'H', date: '2026-06-26', time: '20:00', team1: 'URUGUAY', team2: 'ESPAÑA', stadium: 'Estadio Guadalajara', score1: '', score2: '' },
 
             { id: 49, group: 'I', date: '2026-06-16', time: '15:00', team1: 'FRANCIA', team2: 'SENEGAL', stadium: 'Estadio Nueva York/Nueva Jersey', score1: '', score2: '' },
-            { id: 50, group: 'I', date: '2026-06-16', time: '18:00', team1: 'NORUEGA', team2: 'IRAK', stadium: 'Estadio Boston', score1: '', score2: '' },
-            { id: 51, group: 'I', date: '2026-06-21', time: '15:00', team1: 'FRANCIA', team2: 'NORUEGA', stadium: 'Estadio Filadelfia', score1: '', score2: '' },
-            { id: 52, group: 'I', date: '2026-06-21', time: '18:00', team1: 'SENEGAL', team2: 'IRAK', stadium: 'Estadio Toronto', score1: '', score2: '' },
+            { id: 50, group: 'I', date: '2026-06-16', time: '18:00', team1: 'IRAK', team2: 'NORUEGA', stadium: 'Estadio Boston', score1: '', score2: '' },
+            { id: 51, group: 'I', date: '2026-06-22', time: '17:00', team1: 'FRANCIA', team2: 'IRAK', stadium: 'Estadio Filadelfia', score1: '', score2: '' },
+            { id: 52, group: 'I', date: '2026-06-22', time: '20:00', team1: 'NORUEGA', team2: 'SENEGAL', stadium: 'Estadio Nueva York/Nueva Jersey', score1: '', score2: '' },
             { id: 53, group: 'I', date: '2026-06-26', time: '15:00', team1: 'NORUEGA', team2: 'FRANCIA', stadium: 'Estadio Boston', score1: '', score2: '' },
             { id: 54, group: 'I', date: '2026-06-26', time: '15:00', team1: 'SENEGAL', team2: 'IRAK', stadium: 'Estadio Toronto', score1: '', score2: '' },
 
             { id: 55, group: 'J', date: '2026-06-16', time: '21:00', team1: 'ARGENTINA', team2: 'ARGELIA', stadium: 'Estadio Kansas City', score1: '', score2: '' },
-            { id: 56, group: 'J', date: '2026-06-16', time: '23:59', team1: 'AUSTRIA', team2: 'JORDANIA', stadium: 'Estadio Seattle', score1: '', score2: '' },
-            { id: 57, group: 'J', date: '2026-06-21', time: '21:00', team1: 'ARGENTINA', team2: 'AUSTRIA', stadium: 'Estadio Dallas', score1: '', score2: '' },
-            { id: 58, group: 'J', date: '2026-06-21', time: '23:59', team1: 'ARGELIA', team2: 'JORDANIA', stadium: 'Estadio Los Angeles', score1: '', score2: '' },
+            { id: 56, group: 'J', date: '2026-06-17', time: '23:59', team1: 'AUSTRIA', team2: 'JORDANIA', stadium: 'Estadio Seattle', score1: '', score2: '' },
+            { id: 57, group: 'J', date: '2026-06-22', time: '13:00', team1: 'ARGENTINA', team2: 'AUSTRIA', stadium: 'Estadio Dallas', score1: '', score2: '' },
+            { id: 58, group: 'J', date: '2026-06-22', time: '23:00', team1: 'ARGELIA', team2: 'JORDANIA', stadium: 'Estadio Los Angeles', score1: '', score2: '' },
             { id: 59, group: 'J', date: '2026-06-27', time: '22:00', team1: 'ARGELIA', team2: 'AUSTRIA', stadium: 'Estadio Kansas City', score1: '', score2: '' },
             { id: 60, group: 'J', date: '2026-06-27', time: '22:00', team1: 'JORDANIA', team2: 'ARGENTINA', stadium: 'Estadio Dallas', score1: '', score2: '' },
 
             { id: 61, group: 'K', date: '2026-06-17', time: '13:00', team1: 'PORTUGAL', team2: 'REP. del CONGO', stadium: 'Estadio Houston', score1: '', score2: '' },
             { id: 62, group: 'K', date: '2026-06-17', time: '22:00', team1: 'UZBEKISTÁN', team2: 'COLOMBIA', stadium: 'Estadio Ciudad de México', score1: '', score2: '' },
-            { id: 63, group: 'K', date: '2026-06-22', time: '15:00', team1: 'PORTUGAL', team2: 'UZBEKISTÁN', stadium: 'Estadio Atlanta', score1: '', score2: '' },
-            { id: 64, group: 'K', date: '2026-06-22', time: '18:00', team1: 'REP. del CONGO', team2: 'COLOMBIA', stadium: 'Estadio Monterrey', score1: '', score2: '' },
+            { id: 63, group: 'K', date: '2026-06-23', time: '15:00', team1: 'PORTUGAL', team2: 'UZBEKISTÁN', stadium: 'Estadio Atlanta', score1: '', score2: '' },
+            { id: 64, group: 'K', date: '2026-06-23', time: '22:00', team1: 'REP. del CONGO', team2: 'COLOMBIA', stadium: 'Estadio Monterrey', score1: '', score2: '' },
             { id: 65, group: 'K', date: '2026-06-27', time: '19:30', team1: 'COLOMBIA', team2: 'PORTUGAL', stadium: 'Estadio Miami', score1: '', score2: '' },
             { id: 66, group: 'K', date: '2026-06-27', time: '19:30', team1: 'REP. del CONGO', team2: 'UZBEKISTÁN', stadium: 'Estadio Atlanta', score1: '', score2: '' },
 
             { id: 67, group: 'L', date: '2026-06-17', time: '16:00', team1: 'INGLATERRA', team2: 'CROACIA', stadium: 'Estadio Dallas', score1: '', score2: '' },
             { id: 68, group: 'L', date: '2026-06-17', time: '19:00', team1: 'GHANA', team2: 'PANAMÁ', stadium: 'Estadio Kansas City', score1: '', score2: '' },
-            { id: 69, group: 'L', date: '2026-06-22', time: '21:00', team1: 'INGLATERRA', team2: 'GHANA', stadium: 'Estadio Dallas', score1: '', score2: '' },
-            { id: 70, group: 'L', date: '2026-06-22', time: '23:59', team1: 'CROACIA', team2: 'PANAMÁ', stadium: 'Estadio San Francisco', score1: '', score2: '' },
+            { id: 69, group: 'L', date: '2026-06-23', time: '16:00', team1: 'INGLATERRA', team2: 'GHANA', stadium: 'Estadio Dallas', score1: '', score2: '' },
+            { id: 70, group: 'L', date: '2026-06-23', time: '19:00', team1: 'CROACIA', team2: 'PANAMÁ', stadium: 'Estadio San Francisco', score1: '', score2: '' },
             { id: 71, group: 'L', date: '2026-06-27', time: '17:00', team1: 'PANAMÁ', team2: 'INGLATERRA', stadium: 'Estadio Nueva York/Nueva Jersey', score1: '', score2: '' },
             { id: 72, group: 'L', date: '2026-06-27', time: '17:00', team1: 'CROACIA', team2: 'GHANA', stadium: 'Estadio Filadelfia', score1: '', score2: '' }
         ];
@@ -676,16 +675,19 @@
             loadedMatches.forEach(loaded => {
                 if (!loaded || !loaded.group || !loaded.team1 || !loaded.team2) return;
                 
-                // Buscamos coincidencia inequívoca por grupo y nombre de equipos
+                // Buscamos coincidencia inequívoca por grupo y nombre de equipos (soporta si local/visitante fue invertido)
                 const found = stableMatches.find(stable => 
                     stable.group === loaded.group && 
-                    stable.team1.trim().toUpperCase() === loaded.team1.trim().toUpperCase() &&
-                    stable.team2.trim().toUpperCase() === loaded.team2.trim().toUpperCase()
+                    ((stable.team1.trim().toUpperCase() === loaded.team1.trim().toUpperCase() && 
+                      stable.team2.trim().toUpperCase() === loaded.team2.trim().toUpperCase()) ||
+                     (stable.team1.trim().toUpperCase() === loaded.team2.trim().toUpperCase() && 
+                      stable.team2.trim().toUpperCase() === loaded.team1.trim().toUpperCase()))
                 );
                 
                 if (found) {
-                    found.score1 = (loaded.score1 !== undefined && loaded.score1 !== null && loaded.score1 !== "") ? parseInt(loaded.score1) : '';
-                    found.score2 = (loaded.score2 !== undefined && loaded.score2 !== null && loaded.score2 !== "") ? parseInt(loaded.score2) : '';
+                    const isSwapped = found.team1.trim().toUpperCase() === loaded.team2.trim().toUpperCase();
+                    found.score1 = (loaded.score1 !== undefined && loaded.score1 !== null && loaded.score1 !== "") ? parseInt(isSwapped ? loaded.score2 : loaded.score1) : '';
+                    found.score2 = (loaded.score2 !== undefined && loaded.score2 !== null && loaded.score2 !== "") ? parseInt(isSwapped ? loaded.score1 : loaded.score2) : '';
                 }
             });
             
@@ -1505,7 +1507,7 @@
             // Asigna el nombre o etiqueta resuelta
             nextMatch[slot] = resolvedWinner;
 
-            // Al comparar resolvedWinner and previousWinner (por ejemplo, ambos vacíos se resuelven como "Ganador Dieciseisavos #1")
+            // Al comparar resolvedWinner y previousWinner (por ejemplo, ambos vacíos se resuelven como "Ganador Dieciseisavos #1")
             // evitamos reseteos accidentales en fases superiores al cargar o recuperar sesión.
             if (previousWinner !== resolvedWinner) {
                 nextMatch.homeScore = '';
